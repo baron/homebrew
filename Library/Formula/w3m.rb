@@ -11,8 +11,7 @@ class W3m < Formula
 
   def install
     system "./configure", "--disable-debug", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
-                          "--disable-image"
+                          "--prefix=#{prefix}"
     system "make install"
   end
 end
