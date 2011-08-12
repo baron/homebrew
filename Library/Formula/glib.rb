@@ -19,7 +19,7 @@ class Glib < Formula
   depends_on 'libiconv'
 
   def patches
-    mp = "https://svn.macports.org/repository/macports/trunk/dports/devel/glib2/files/"
+    mp = "http://thammuz.tchpc.tcd.ie/mirrors/macports/trunk/dports/devel/glib2/files/"
     {
       :p0 => [
         mp+"patch-configure.ac.diff",
@@ -64,7 +64,7 @@ class Glib < Formula
     system "./configure", *args
 
     # Fix for 64-bit support, from MacPorts
-    curl "https://svn.macports.org/repository/macports/trunk/dports/devel/glib2/files/config.h.ed", "-O"
+    curl "http://thammuz.tchpc.tcd.ie/mirrors/macports/trunk/dports/devel/glib2/files/config.h.ed", "-O"
     system "ed - config.h < config.h.ed"
 
     system "make"
