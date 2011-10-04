@@ -1,9 +1,14 @@
 require 'formula'
 
 class Emacs < Formula
-  url 'http://ftp.gnu.org/pub/gnu/emacs/emacs-23.3a.tar.bz2'
+  url 'http://ftpmirror.gnu.org/emacs/emacs-23.3a.tar.bz2'
   md5 'f2cf8dc6f28f8ae59bc695b4ddda339c'
   homepage 'http://www.gnu.org/software/emacs/'
+
+  fails_with_llvm "Duplicate symbol errors while linking.", :build => 2334
+
+  # Stripping on Xcode 4 causes malformed object errors
+  skip_clean ["bin/emacs", "bin/emacs-23.3", "bin/emacs-24.0.50"]
 
   if ARGV.include? "--use-git-head"
     head 'git://repo.or.cz/emacs.git'
@@ -14,7 +19,6 @@ class Emacs < Formula
   def options
     [
       ["--cocoa", "Build a Cocoa version of emacs"],
-      ["--lion", "Enable Lion full-screen mode"],
       ["--srgb", "Enable sRGB colors in the Cocoa version of emacs"],
       ["--with-x", "Include X11 support"],
       ["--use-git-head", "Use repo.or.cz git mirror for HEAD builds"],
@@ -22,31 +26,27 @@ class Emacs < Formula
   end
 
   def patches
-    p0,p1 = [],[]
+    p = []
 
     # Fix for building with Xcode 4; harmless on Xcode 3.x.
     unless ARGV.build_head?
-      p1 << "http://repo.or.cz/w/emacs.git/commitdiff_plain/c8bba48c5889c4773c62a10f7c3d4383881f11c1"
-      p1 << "https://raw.github.com/gist/1098107"
+      p << "http://repo.or.cz/w/emacs.git/commitdiff_plain/c8bba48c5889c4773c62a10f7c3d4383881f11c1"
+      # Fix for address randomization on Darwin. Based on:
+      #   http://repo.or.cz/w/emacs.git/patch/f2cea124dffac9ca4b8ce1dbb9b746f8e81109a3
+      p << "https://raw.github.com/gist/1098107"
+      # Fix for the titlebar issue on Mac OS X 10.7
+      p << "https://raw.github.com/gist/1102744"
+      # Fix for Shift key for IME users
+      p << "https://raw.github.com/gist/1212776"
     end
 
     if ARGV.include? "--cocoa"
       # Fullscreen patch, works against 23.3 and HEAD.
-      p1 << "https://raw.github.com/gist/1012927"
-    end
-    
-    if ARGV.include? "--lion"
-      p1 << "https://raw.github.com/gist/1101856"
+      p << "https://raw.github.com/gist/1012927"
     end
 
-    if ARGV.include? "--inline"
-      p0 << "http://jaist.dl.sourceforge.jp/macemacsjp/47986/inline_patch-23.2-beta3.tar.gz"
-    end
-
-    return {:p0 => p0, :p1 => p1}
+    return p
   end
-
-  fails_with_llvm "Duplicate symbol errors while linking."
 
   def install
     args = ["--prefix=#{prefix}",
@@ -81,6 +81,7 @@ class Emacs < Formula
       ln_s prefix+'Emacs.app/Contents/MacOS/bin/etags', bin
     else
       if ARGV.include? "--with-x"
+        ENV.x11
         args << "--with-x"
         args << "--with-gif=no" << "--with-tiff=no" << "--with-jpeg=no"
       else
@@ -102,6 +103,11 @@ class Emacs < Formula
 
         Command-line emacs can be used by setting up an alias:
           alias emacs="#{prefix}/Emacs.app/Contents/MacOS/Emacs -nw"
+
+         To link the application to a normal Mac OS X location:
+           brew linkapps
+         or:
+           ln -s #{prefix}/Emacs.app /Applications
 
       EOS
     end
