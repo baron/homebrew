@@ -1,9 +1,9 @@
 require 'formula'
 
 class Tomcat < Formula
-  url 'http://www.apache.org/dyn/closer.cgi?path=tomcat/tomcat-7/v7.0.19/bin/apache-tomcat-7.0.19.tar.gz'
+  url 'http://www.apache.org/dyn/closer.cgi?path=tomcat/tomcat-7/v7.0.21/bin/apache-tomcat-7.0.21.tar.gz'
   homepage 'http://tomcat.apache.org/'
-  md5 '4bea2283d72326c35435234164749efa'
+  md5 '1fcbf1fcaa40c9b27a81379be1e861f7'
 
   skip_clean :all
 
