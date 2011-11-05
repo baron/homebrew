@@ -6,7 +6,8 @@ class Gdbm < Formula
   md5 '59f6e4c4193cb875964ffbe8aa384b58'
 
   def install
-    system "./configure", "--disable-dependency-tracking",
+    inreplace "configure", "-flat_namespace -undefined suppress", "-undefined dynamic_lookup"
+    system "./configure", "--disable-debug", "--disable-dependency-tracking",
                           "--prefix=#{prefix}",
                           "--mandir=#{man}", "--infodir=#{info}"
     inreplace "Makefile", "-o $(BINOWN) -g $(BINGRP)", ""
