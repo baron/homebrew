@@ -1,8 +1,8 @@
 require 'formula'
 
 class OfflineImap < Formula
-  url "https://github.com/nicolas33/offlineimap/tarball/v6.3.4"
-  head "https://github.com/nicolas33/offlineimap.git"
+  url "https://github.com/downloads/spaetz/offlineimap/offlineimap-v6.5.1.2.tar.gz"
+  head "https://github.com/spaetz/offlineimap.git"
   homepage "http://offlineimap.org/"
 
   def install
