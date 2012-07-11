@@ -1,11 +1,4 @@
 require 'testing_env'
-
-require 'extend/ARGV' # needs to be after test/unit to avoid conflict with OptionsParser
-ARGV.extend(HomebrewArgvExtension)
-
-require 'extend/ENV'
-ENV.extend(HomebrewEnvExtension)
-
 require 'test/testball'
 
 class CompilerTests < Test::Unit::TestCase
@@ -53,7 +46,7 @@ class CompilerTests < Test::Unit::TestCase
     assert !(f.fails_with? :clang)
     assert !(f.fails_with? :llvm)
     assert case MacOS.gcc_42_build_version
-      when 0 then f.fails_with? :gcc
+      when nil then f.fails_with? :gcc
       else !(f.fails_with? :gcc)
       end
 
@@ -95,7 +88,7 @@ class CompilerTests < Test::Unit::TestCase
     assert f.fails_with? :clang
     assert f.fails_with? :llvm
     assert case MacOS.gcc_42_build_version
-      when 0 then f.fails_with? :gcc
+      when nil then f.fails_with? :gcc
       else !(f.fails_with? :gcc)
       end
 

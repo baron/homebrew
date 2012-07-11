@@ -12,6 +12,7 @@ class W3m < Formula
   def install
     system "./configure", "--disable-debug", "--disable-dependency-tracking",
                           "--prefix=#{prefix}"
+    ENV.j1 #                          
     system "make install"
   end
 
