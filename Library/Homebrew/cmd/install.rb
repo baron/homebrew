@@ -15,9 +15,7 @@ module Homebrew extend self
     end unless ARGV.force?
 
     if Process.uid.zero? and not File.stat(HOMEBREW_BREW_FILE).uid.zero?
-      # note we only abort if Homebrew is *not* installed as sudo and the user
-      # calls brew as root. The fix is to chown brew to root.
-      abort "Cowardly refusing to `sudo brew install'"
+      raise "Cowardly refusing to `sudo brew install'\n#{SUDO_BAD_ERRMSG}"
     end
 
     install_formulae ARGV.formulae
@@ -39,8 +37,11 @@ module Homebrew extend self
 
   def check_xcode
     require 'cmd/doctor'
-    xcode = Checks.new.check_for_latest_xcode
-    opoo xcode unless xcode.nil?
+    checks = Checks.new
+    %w{check_for_latest_xcode check_xcode_license_approved}.each do |check|
+      out = checks.send(check)
+      opoo out unless out.nil?
+    end
   end
 
   def check_macports

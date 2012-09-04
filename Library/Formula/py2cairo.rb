@@ -3,23 +3,21 @@ require 'formula'
 class Py2cairo < Formula
   homepage 'http://cairographics.org/pycairo/'
   url 'http://cairographics.org/releases/py2cairo-1.10.0.tar.bz2'
-  md5 '20337132c4ab06c1146ad384d55372c5'
+  sha1 '2efa8dfafbd6b8e492adaab07231556fec52d6eb'
 
   depends_on 'cairo'
   depends_on :x11
+
+  option :universal
 
   fails_with :llvm do
     build 2336
     cause "The build script will set -march=native which llvm can't accept"
   end
 
-  def options
-    [['--universal', 'Build universal binaries']]
-  end
-
   def install
     # Python extensions default to universal but cairo may not be universal
-    unless ARGV.build_universal?
+    unless build.universal?
       ENV['ARCHFLAGS'] = if MacOS.prefer_64_bit?
         "-arch x86_64"
       else
