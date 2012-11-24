@@ -16,6 +16,8 @@ class Macvim < Formula
   depends_on 'cscope' if build.include? 'with-cscope'
   depends_on 'lua' if build.include? 'with-lua'
 
+  depends_on :xcode # For xcodebuild.
+
   def install
     # Set ARCHFLAGS so the Python app (with C extension) that is
     # used to create the custom icons will not try to compile in
@@ -25,7 +27,7 @@ class Macvim < Formula
 
     # If building for 10.8, make sure that CC is set to "clang".
     # Reference: https://github.com/b4winckler/macvim/wiki/building
-    ENV['CC'] = "clang" if MacOS.mountain_lion?
+    ENV['CC'] = "clang" if MacOS.version >= :mountain_lion
 
     args = %W[
       --with-features=huge
@@ -67,7 +69,7 @@ class Macvim < Formula
     bin.install "src/MacVim/mvim"
 
     # Create MacVim vimdiff, view, ex equivalents
-    executables = %w[mvimdiff mview mvimex]
+    executables = %w[mvimdiff mview mvimex gvim gvimdiff gview gvimex]
     executables += %w[vi vim vimdiff view vimex] if build.include? "override-system-vim"
     executables.each {|f| ln_s bin+'mvim', bin+f}
   end

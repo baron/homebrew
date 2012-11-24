@@ -2,8 +2,8 @@ require 'formula'
 
 class Vimpager < Formula
   homepage 'https://github.com/rkitover/vimpager'
-  url 'https://github.com/rkitover/vimpager/tarball/1.7.1'
-  sha1 '4e44e3af13e4ca927a2d9fcda15b3ecb958dbd06'
+  url 'https://github.com/rkitover/vimpager/tarball/1.7.5'
+  sha1 'e4c710608e092a5cf5b7b35376dfd3d2c8c388a2'
   head 'https://github.com/rkitover/vimpager.git'
 
   def install

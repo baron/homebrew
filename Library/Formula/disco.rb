@@ -9,7 +9,7 @@ class Disco < Formula
   head 'https://github.com/tuulos/disco.git'
 
   depends_on 'erlang'
-  depends_on 'simplejson' => :python if MacOS.leopard?
+  depends_on 'simplejson' => :python if MacOS.version == :leopard
   depends_on 'libcmph'
 
   def install
@@ -33,8 +33,8 @@ class Disco < Formula
     system "make install"
     ENV.delete('CC')
     system "make install-discodb install-discodex"
-    bin.install ['contrib/discodex/bin/discodex','contrib/discodex/bin/discodexcli.py']
-    prefix.install ['contrib', 'doc', 'examples', 'node']
+    bin.install %w[contrib/discodex/bin/discodex contrib/discodex/bin/discodexcli.py]
+    prefix.install %w[contrib doc examples node]
   end
 
   def caveats; <<-EOS.undent

@@ -23,12 +23,14 @@ end
 
 class Elixir < Formula
   homepage 'http://elixir-lang.org/'
-  url  'https://github.com/elixir-lang/elixir/tarball/v0.6.0'
-  sha1 '618e66e037c2d930428ca75a11b4e9648caffb9a'
+  url  'https://github.com/elixir-lang/elixir/tarball/v0.7.1'
+  sha1 '6344b7a49196581bf45e0cb2f51a4fe3e6e07aa5'
 
-  head 'https://github.com/elixir-lang/elixir.git', :branch => "stable"
+  head 'https://github.com/elixir-lang/elixir.git', :branch => 'stable'
 
   depends_on ErlangInstalled.new
+
+  env :userpaths
 
   def install
     system "make"
@@ -36,7 +38,7 @@ class Elixir < Formula
 
     Dir['lib/*/ebin'].each do |path|
       app  = File.basename(File.dirname(path))
-      (lib/"#{app}/ebin").install path
+      (lib/"#{app}").install path
     end
   end
 
