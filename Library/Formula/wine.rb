@@ -27,8 +27,8 @@ class Wine < Formula
     # updating too
     #  * http://wiki.winehq.org/Gecko
     #  * http://wiki.winehq.org/Mono
-    url 'http://downloads.sourceforge.net/project/wine/Source/wine-1.5.25.tar.bz2'
-    sha1 'fdc0067cce2176577a61b693fcbbf98ec1d50f2a'
+    url 'http://downloads.sourceforge.net/project/wine/Source/wine-1.5.26.tar.bz2'
+    sha1 '278dd0864468ae1883d2ca605e7468d4d1d4123e'
   end
 
   env :std
@@ -83,13 +83,16 @@ class Wine < Formula
 
     ENV["LIBS"] = "-lGL -lGLU"
     ENV.append "CFLAGS", build32
-    if ENV.compiler == :clang and !build.devel?
+
+    # Still miscompiles at v1.5.25
+    if ENV.compiler == :clang
       opoo <<-EOS.undent
         Clang currently miscompiles some parts of Wine. If you have gcc, you
         can get a more stable build with:
           brew install wine --use-gcc
       EOS
     end
+
     ENV.append "CXXFLAGS", "-D_DARWIN_NO_64_BIT_INODE"
     ENV.append "LDFLAGS", "#{build32} -framework CoreServices -lz -lGL -lGLU"
 
