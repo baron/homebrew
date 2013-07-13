@@ -15,6 +15,8 @@ class Isync < Formula
   end
 
   def install
+    inreplace 'configure.in', 'AM_CONFIG_HEADER', 'AC_CONFIG_HEADERS'
+    inreplace 'configure.in', 'AM_PROG_CC_STDC', 'AC_PROG_CC'
     system "touch", "ChangeLog" if build.head?
     system "./autogen.sh" if build.head?
 
