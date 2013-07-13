@@ -2,17 +2,20 @@ require 'formula'
 
 class Uwsgi < Formula
   homepage 'http://projects.unbit.it/uwsgi/'
-  url 'http://projects.unbit.it/downloads/uwsgi-1.9.tar.gz'
-  sha1 'd09cd6764d3e1e6617ad27a1c634b097d2c4c312'
+  url 'https://projects.unbit.it/downloads/uwsgi-1.9.11.tar.gz'
+  sha1 '2b3d4f225808decb50399b9cdb387e022dd3729d'
 
+  depends_on :python
   depends_on 'pcre'
   depends_on 'libyaml'
 
   def install
-    arch = MacOS.prefer_64_bit? ? 'x86_64' : 'i386'
-    %w{CFLAGS LDFLAGS}.each { |e| ENV.append e, "-arch #{arch}" }
+    python do
+      arch = MacOS.prefer_64_bit? ? 'x86_64' : 'i386'
+      %w{CFLAGS LDFLAGS}.each { |e| ENV.append e, "-arch #{arch}" }
 
-    system "python", "uwsgiconfig.py", "--build"
-    bin.install "uwsgi"
+      system python, "uwsgiconfig.py", "--build"
+      bin.install "uwsgi"
+    end
   end
 end
