@@ -14,6 +14,12 @@ class Isync < Formula
     depends_on :automake
   end
 
+  def patches
+    # Add "PassCommand" config:
+    # http://sourceforge.net/p/isync/patches/12/
+    "http://sourceforge.net/p/isync/patches/_discuss/thread/17e52692/e059/attachment/passcommand.patch"
+  end if build.head?
+
   def install
     inreplace 'configure.in', 'AM_CONFIG_HEADER', 'AC_CONFIG_HEADERS'
     inreplace 'configure.in', 'AM_PROG_CC_STDC', 'AC_PROG_CC'

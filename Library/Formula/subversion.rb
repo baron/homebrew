@@ -5,6 +5,12 @@ class Subversion < Formula
   url 'http://www.apache.org/dyn/closer.cgi?path=subversion/subversion-1.8.0.tar.bz2'
   sha1 '45d227511507c5ed99e07f9d42677362c18b364c'
 
+  bottle do
+    sha1 '4b8920c129cfc8adbf491a69d836a5a8f7455409' => :mountain_lion
+    sha1 'ee99dbd0f7b7d4abfdfc5d7a82a008d720713e47' => :lion
+    sha1 '733d68a8bfd92a64270fb67f0bc4cc0974602bf0' => :snow_leopard
+  end
+
   option :universal
   option 'java', 'Build Java bindings'
   option 'perl', 'Build Perl bindings'
@@ -21,7 +27,7 @@ class Subversion < Formula
   depends_on :libtool if build.include? 'ruby'
 
   # If building bindings, allow non-system interpreters
-  env :userpaths if (build.include? 'perl') or (build.include? 'ruby')
+  env :userpaths if build.include? 'perl' or build.include? 'ruby'
 
   def patches
     ps = []
@@ -42,7 +48,7 @@ class Subversion < Formula
   fails_with :clang do
     build 318
     cause "core.c:1: error: bad value (native) for -march= switch"
-  end if (build.include? 'perl') or (build.include? 'ruby')
+  end if build.include? 'perl' or build.include? 'ruby'
 
   def apr_bin
     superbin or "/usr/bin"
@@ -73,7 +79,7 @@ class Subversion < Formula
         puts "  brew install subversion --universal --java"
       end
 
-      unless (ENV["JAVA_HOME"] or "").empty?
+      ENV.fetch('JAVA_HOME') do
         opoo "JAVA_HOME is set. Try unsetting it if JNI headers cannot be found."
       end
     end
