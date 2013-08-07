@@ -6,8 +6,8 @@ class Setuptools < Formula
 end
 
 class Pip < Formula
-  url 'https://pypi.python.org/packages/source/p/pip/pip-1.3.1.tar.gz'
-  sha1 '9c70d314e5dea6f41415af814056b0f63c3ffd14'
+  url 'https://pypi.python.org/packages/source/p/pip/pip-1.4.tar.gz'
+  sha1 '3149dc77c66b77d02497205fca5df56ae9d3e753'
 end
 
 class Python < Formula
@@ -35,7 +35,7 @@ class Python < Formula
   def patches
     p = []
     p << 'https://gist.github.com/paxswill/5402840/raw/75646d5860685c8be98858288d1772f64d6d5193/pythondtrace-patch.diff' if build.with? 'dtrace'
-    # Patch to disable the search for Tk.frameworked, since homebrew's Tk is
+    # Patch to disable the search for Tk.framework, since Homebrew's Tk is
     # a plain unix build. Remove `-lX11`, too because our Tk is "AquaTk".
     p << DATA if build.with? 'brewed-tk'
     p

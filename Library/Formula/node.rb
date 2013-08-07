@@ -29,10 +29,11 @@ class NpmNotInstalled < Requirement
   end
 end
 
+# Note that x.even are stable releases, x.odd are devel releases
 class Node < Formula
   homepage 'http://nodejs.org/'
-  url 'http://nodejs.org/dist/v0.10.14/node-v0.10.14.tar.gz'
-  sha1 'b5d27b36d25bd7d45e1bb52ce0e0fdfb49dde370'
+  url 'http://nodejs.org/dist/v0.10.15/node-v0.10.15.tar.gz'
+  sha1 '14174896de074c244b0ed2251a95d7163d5a5e87'
 
   devel do
     url 'http://nodejs.org/dist/v0.11.4/node-v0.11.4.tar.gz'
@@ -65,9 +66,6 @@ class Node < Formula
 
     unless build.include? 'without-npm'
       (lib/"node_modules/npm/npmrc").write("prefix = #{npm_prefix}\n")
-      # we need to force make this directory, or node modules installed here
-      # by npm will end up in the node keg and won't survive upgrades
-      mkdir_p "#{HOMEBREW_PREFIX}/lib/node_modules"
     end
   end
 
