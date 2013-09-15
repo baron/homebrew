@@ -25,14 +25,8 @@ class Mysql < Formula
   option 'enable-memcached', 'Enable innodb-memcached support'
   option 'enable-debug', 'Build with debug support'
 
-  conflicts_with 'mariadb',
-    :because => "mysql and mariadb install the same binaries."
-
-  conflicts_with 'percona-server',
-    :because => "mysql and percona-server install the same binaries."
-
-  conflicts_with 'mysql-cluster',
-    :because => "mysql and mysql-cluster install the same binaries."
+  conflicts_with 'mysql-cluster', 'mariadb', 'percona-server',
+    :because => "mysql, mariadb, and percona install the same binaries."
 
   env :std if build.universal?
 
@@ -85,7 +79,7 @@ class Mysql < Formula
     args << "-DWITH_BLACKHOLE_STORAGE_ENGINE=1" if build.include? 'with-blackhole-storage-engine'
 
     # Make universal for binding to universal applications
-    args << "-DCMAKE_OSX_ARCHITECTURES='i386;x86_64'" if build.universal?
+    args << "-DCMAKE_OSX_ARCHITECTURES='#{Hardware::CPU.universal_archs.as_cmake_arch_flags}'" if build.universal?
 
     # Build with local infile loading support
     args << "-DENABLED_LOCAL_INFILE=1" if build.include? 'enable-local-infile'

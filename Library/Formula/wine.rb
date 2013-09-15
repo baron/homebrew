@@ -1,24 +1,19 @@
 require 'formula'
 
-class WineGecko < Formula
-  url 'http://downloads.sourceforge.net/wine/wine_gecko-2.21-x86.msi', :using => :nounzip
-  sha1 'a514fc4d53783a586c7880a676c415695fe934a3'
-end
-
-class WineMono < Formula
-  url 'http://downloads.sourceforge.net/wine/wine-mono-0.0.8.msi', :using => :nounzip
-  sha1 'dd349e72249ce5ff981be0e9dae33ac4a46a9f60'
-end
-
-# NOTE: when updating Wine, please check Wine-Gecko and Wine-Mono for updates
-#  http://wiki.winehq.org/Gecko
-#  http://wiki.winehq.org/Mono
+# NOTE: When updating Wine, please check Wine-Gecko and Wine-Mono for updates too:
+# http://wiki.winehq.org/Gecko
+# http://wiki.winehq.org/Mono
 class Wine < Formula
   homepage 'http://winehq.org/'
   url 'http://downloads.sourceforge.net/project/wine/Source/wine-1.6.tar.bz2'
   sha256 'e1f130efbdcbfa211ca56ee03357ccd17a31443889b4feebdcb88248520b42ae'
 
   head 'git://source.winehq.org/git/wine.git'
+
+  devel do
+    url 'http://downloads.sourceforge.net/project/wine/Source/wine-1.7.2.tar.bz2'
+    sha256 '0bfc4276c93de1fdd5989f91807c7362b11995efdf581d60601fec789665b7f1'
+  end
 
   env :std
 
@@ -33,11 +28,27 @@ class Wine < Formula
   depends_on :x11 => :recommended
   depends_on 'freetype' if build.without? 'x11'
   depends_on 'jpeg'
+  depends_on 'libgphoto2'
   depends_on 'libicns'
   depends_on 'libtiff'
-  depends_on 'little-cms'
   depends_on 'sane-backends'
-  depends_on 'libgphoto2'
+  depends_on 'libgsm' => :optional
+
+  if build.stable?
+    depends_on 'little-cms'
+  else
+    depends_on 'little-cms2'
+  end
+
+  resource 'gecko' do
+    url 'http://downloads.sourceforge.net/wine/wine_gecko-2.21-x86.msi', :using => :nounzip
+    sha1 'a514fc4d53783a586c7880a676c415695fe934a3'
+  end
+
+  resource 'mono' do
+    url 'http://downloads.sourceforge.net/wine/wine-mono-0.0.8.msi', :using => :nounzip
+    sha1 'dd349e72249ce5ff981be0e9dae33ac4a46a9f60'
+  end
 
   fails_with :llvm do
     build 2336
@@ -47,6 +58,11 @@ class Wine < Formula
   fails_with :clang do
     build 421
     cause 'error: invalid operand for instruction lretw'
+  end
+
+  def patches
+    # http://bugs.winehq.org/show_bug.cgi?id=34188
+    ['http://bugs.winehq.org/attachment.cgi?id=45477']
   end
 
   # the following libraries are currently not specified as dependencies, or not built as 32-bit:
@@ -70,6 +86,15 @@ class Wine < Formula
     ENV.append "CFLAGS", build32
     ENV.append "LDFLAGS", build32
 
+    # Still miscompiles at v1.6
+    if ENV.compiler == :clang
+      opoo <<-EOS.undent
+        Clang currently miscompiles some parts of Wine. If you have gcc, you
+        can get a more stable build with:
+          brew install wine --use-gcc
+      EOS
+    end
+
     # Workarounds for XCode not including pkg-config files
     ENV.libxml2
     ENV.append "LDFLAGS", "-lxslt"
@@ -86,6 +111,8 @@ class Wine < Formula
     # 64-bit builds of mpg123 are incompatible with 32-bit builds of Wine
     args << "--without-mpg123" if Hardware.is_64_bit?
 
+    args << "--without-x" if build.without? 'x11'
+
     system "./configure", *args
 
     unless ENV.compiler == :clang or ENV.compiler == :llvm
@@ -96,18 +123,16 @@ class Wine < Formula
     end
 
     system "make install"
-
-    # Don't need Gnome desktop support
-    (share/'applications').rmtree
-
-    # Download Gecko and Mono once so we don't need to redownload for each prefix
-    WineGecko.new('winegecko').brew { (share+'wine/gecko').install Dir["*"] }
-    WineMono.new('winemono').brew { (share+'wine/mono').install Dir["*"] }
+    (share/'wine/gecko').install resource('gecko')
+    (share/'wine/mono').install resource('mono')
 
     # Use a wrapper script, so rename wine to wine.bin
     # and name our startup script wine
     mv bin/'wine', bin/'wine.bin'
     (bin/'wine').write(wine_wrapper)
+
+    # Don't need Gnome desktop support
+    (share/'applications').rmtree
   end
 
   def caveats
