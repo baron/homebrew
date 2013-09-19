@@ -20,7 +20,9 @@ class Glib < Formula
 
   def patches
     p = {}
-    # https://bugzilla.gnome.org/show_bug.cgi?id=673135 Resolved as wontfix.
+    # https://bugzilla.gnome.org/show_bug.cgi?id=673135 Resolved as wontfix,
+    # but needed to fix an assumption about the location of the d-bus machine
+    # id file.
     p[:p1] = "https://gist.github.com/jacknagel/5393707/raw/5a9047ab7838709084b36242a44471b02d036386/glib-configurable-paths.patch"
     p[:p0] = "https://trac.macports.org/export/95596/trunk/dports/devel/glib2/files/patch-configure.diff" if build.universal?
     p
@@ -36,6 +38,7 @@ class Glib < Formula
     args = %W[
       --disable-maintainer-mode
       --disable-dependency-tracking
+      --disable-silent-rules
       --disable-dtrace
       --disable-modular-tests
       --disable-libelf
