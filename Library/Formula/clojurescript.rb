@@ -2,10 +2,9 @@ require 'formula'
 
 class Clojurescript < Formula
   homepage 'https://github.com/clojure/clojurescript'
-  url 'https://github.com/clojure/clojurescript/archive/r1934.tar.gz'
-  sha1 'e1b48dc9409410d7557f9e0c0769fba290e2a6c3'
-
-  head "https://github.com/clojure/clojurescript.git"
+  head 'https://github.com/clojure/clojurescript.git'
+  url 'https://github.com/clojure/clojurescript/archive/r2138.tar.gz'
+  sha1 'd67c77e5da59cc316300ff78a40e7fe3aa8d56fe'
 
   def install
     system "./script/bootstrap"

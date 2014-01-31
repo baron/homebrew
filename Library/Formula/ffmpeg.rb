@@ -2,17 +2,10 @@ require 'formula'
 
 class Ffmpeg < Formula
   homepage 'http://ffmpeg.org/'
-  url 'http://ffmpeg.org/releases/ffmpeg-1.2.4.tar.bz2'
-  sha1 'ee73a05bde209fc23441c7e49767c1b7a4b6f124'
+  url 'http://ffmpeg.org/releases/ffmpeg-2.1.3.tar.bz2'
+  sha1 '9dc54bbef673f3938e280bf48d07e7b24fe445ab'
 
   head 'git://git.videolan.org/ffmpeg.git'
-
-  # This is actually the new stable, not a devel release,
-  # but not everything builds with it yet - notably gpac
-  devel do
-    url 'http://ffmpeg.org/releases/ffmpeg-2.0.2.tar.bz2'
-    sha1 '47d3b3d172ae81f0571549e4dfaadfe5b4fe06cc'
-  end
 
   option "without-x264", "Disable H.264 encoder"
   option "without-lame", "Disable MP3 encoder"
@@ -55,6 +48,8 @@ class Ffmpeg < Formula
   depends_on 'opus' => :optional
   depends_on 'frei0r' => :optional
   depends_on 'libcaca' => :optional
+  depends_on 'libbluray' => :optional
+  depends_on 'libquvi' => :optional
 
   def install
     args = ["--prefix=#{prefix}",
@@ -92,6 +87,7 @@ class Ffmpeg < Formula
     args << "--enable-libopus" if build.with? 'opus'
     args << "--enable-frei0r" if build.with? 'frei0r'
     args << "--enable-libcaca" if build.with? 'libcaca'
+    args << "--enable-libquvi" if build.with? 'libquvi'
 
     if build.with? 'openjpeg'
       args << '--enable-libopenjpeg'
@@ -100,7 +96,7 @@ class Ffmpeg < Formula
 
     # For 32-bit compilation under gcc 4.2, see:
     # http://trac.macports.org/ticket/20938#comment:22
-    ENV.append_to_cflags "-mdynamic-no-pic" if Hardware.is_32_bit? && Hardware.cpu_type == :intel && ENV.compiler == :clang
+    ENV.append_to_cflags "-mdynamic-no-pic" if Hardware.is_32_bit? && Hardware::CPU.intel? && ENV.compiler == :clang
 
     system "./configure", *args
 
