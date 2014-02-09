@@ -115,14 +115,8 @@ end
 class IncompatibleCxxStdlibs < Homebrew::InstallationError
   def initialize(f, dep, wrong, right)
     super f, <<-EOS.undent
-    #{f} dependency #{dep} was built with the following
-    C++ standard library: #{wrong.type_string} (from #{wrong.compiler})
-
-    This is incompatible with the standard library being used
-    to build #{f}: #{right.type_string} (from #{right.compiler})
-
-    Please reinstall #{dep} using a compatible compiler.
-    hint: Check https://github.com/Homebrew/homebrew/wiki/C++-Standard-Libraries
+    #{f} dependency #{dep} was built with a different C++ standard
+    library (#{wrong.type_string} from #{wrong.compiler}). This could cause problems at runtime.
     EOS
   end
 end
@@ -175,7 +169,14 @@ class BuildError < Homebrew::InstallationError
   end
 
   def issues
-    @issues ||= GitHub.issues_for_formula(formula.name)
+    @issues ||= fetch_issues
+  end
+
+  def fetch_issues
+    GitHub.issues_for_formula(formula.name)
+  rescue GitHub::RateLimitExceededError => e
+    opoo e.message
+    []
   end
 
   def dump
