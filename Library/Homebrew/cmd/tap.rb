@@ -110,7 +110,7 @@ module Homebrew extend self
 
   def private_tap?(user, repo)
     GitHub.private_repo?(user, "homebrew-#{repo}")
-  rescue GitHub::HTTPNotFoundError
+  rescue GitHub::HTTPNotFoundError => e
     true
   rescue GitHub::Error
     false

@@ -2,14 +2,14 @@ require 'formula'
 
 class Pyqt < Formula
   homepage 'http://www.riverbankcomputing.co.uk/software/pyqt'
-  url 'https://downloads.sf.net/project/pyqt/PyQt4/PyQt-4.10.4/PyQt-mac-gpl-4.10.4.tar.gz'
-  sha1 'ef3bb2a05a5c8c3ab7578a0991ef5a4e17c314c0'
+  url 'http://downloads.sf.net/project/pyqt/PyQt4/PyQt-4.10.3/PyQt-mac-gpl-4.10.3.tar.gz'
+  sha1 'ba5465f92fb43c9f0a5b948fa25df5045f160bf0'
 
   depends_on :python => :recommended
   depends_on :python3 => :optional
 
-  if build.without?("python3") && build.without?("python")
-    odie "pyqt: --with-python3 must be specified when using --without-python"
+  if (build.without? "python3") && (build.without? "python")
+   odie "pyqt: --with-python3 must be specified when using --without-python"
   end
 
   depends_on 'qt'  # From their site: PyQt currently supports Qt v4 and will build against Qt v5
@@ -20,13 +20,25 @@ class Pyqt < Formula
     depends_on "sip"
   end
 
-  # On Mavericks we want to target libc++, but this requires a user specified
-  # qmake makespec. Unfortunately user specified makespecs are broken in the
-  # configure.py script, so we have to fix the makespec path handling logic.
-  # Also qmake spec macro parsing does not properly handle inline comments,
-  # which can result in ignored build flags when they are concatenated together.
-  # Changes proposed upstream: http://www.riverbankcomputing.com/pipermail/pyqt/2013-December/033537.html
-  patch :DATA
+  def pythons
+    pythons = []
+    ["python", "python3"].each do |python|
+      next if build.without? python
+      version = /\d\.\d/.match `#{python} --version 2>&1`
+      pythons << [python, version]
+    end
+    pythons
+  end
+
+  def patches
+    # On Mavericks we want to target libc++, but this requires a user specified
+    # qmake makespec. Unfortunately user specified makespecs are broken in the
+    # configure.py script, so we have to fix the makespec path handling logic.
+    # Also qmake spec macro parsing does not properly handle inline comments,
+    # which can result in ignored build flags when they are concatenated together.
+    # Changes proposed upstream: http://www.riverbankcomputing.com/pipermail/pyqt/2013-December/033537.html
+    DATA
+  end
 
   def install
     # On Mavericks we want to target libc++, this requires a non default qt makespec
@@ -34,8 +46,9 @@ class Pyqt < Formula
       ENV.append "QMAKESPEC", "unsupported/macx-clang-libc++"
     end
 
-    Language::Python.each_python(build) do |python, version|
-      ENV.append_path 'PYTHONPATH', HOMEBREW_PREFIX/"opt/sip/lib/python#{version}/site-packages"
+    python_path = ENV["PYTHONPATH"]
+    pythons.each do |python, version|
+      ENV.append_path "PYTHONPATH", HOMEBREW_PREFIX/"opt/sip/lib/python#{version}/site-packages"
 
       args = ["--confirm-license",
               "--bindir=#{bin}",
@@ -61,7 +74,10 @@ class Pyqt < Formula
       system python, "./configure-ng.py", *args
       system "make"
       system "make", "install"
-      system "make", "clean"
+      if pythons.length > 1
+        system "make", "clean"
+        ENV["PYTHONPATH"] = python_path
+      end
     end
   end
 
@@ -89,8 +105,11 @@ class Pyqt < Formula
       sys.exit(app.exec_())
     EOS
 
-    Language::Python.each_python(build) do |python, version|
+    python_path = ENV["PYTHONPATH"]
+    pythons.each do |python, version|
+      ENV.append_path "PYTHONPATH", HOMEBREW_PREFIX/"lib/python#{version}/site-packages"
       system python, "test.py"
+      ENV["PYTHONPATH"] = python_path if pythons.length > 1
     end
   end
 end

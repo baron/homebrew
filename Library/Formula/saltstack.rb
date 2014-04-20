@@ -1,9 +1,11 @@
 require 'formula'
 
-# We use a custom download strategy to properly configure
-# salt's version information when built against HEAD.
-# This is populated from git information unfortunately.
 class SaltHeadDownloadStrategy < GitDownloadStrategy
+  # We need to make a local clone so we can't use "--depth 1"
+  def support_depth?
+    false
+  end
+
   def stage
     @clone.cd {reset}
     safe_system 'git', 'clone', @clone, '.'
@@ -12,11 +14,16 @@ end
 
 class Saltstack < Formula
   homepage 'http://www.saltstack.org'
-  url 'https://github.com/saltstack/salt/archive/v2014.1.3.tar.gz'
-  sha256 'cc3e21c6cd333f2058a4f0c78db5103a07a7301f6237644b5eee6a55f9793e24'
+  url 'https://pypi.python.org/packages/source/s/salt/salt-0.17.5.tar.gz'
+  sha1 '7751eb59f3b52e7da541121cc4a543afd7f609f9'
 
   head 'https://github.com/saltstack/salt.git', :branch => 'develop',
-    :using => SaltHeadDownloadStrategy, :shallow => false
+    :using => SaltHeadDownloadStrategy
+
+  devel do
+    url 'https://github.com/saltstack/salt/archive/v2014.1.0rc3.tar.gz'
+    sha1 '2c1bd6d9b26b66ef32b30af9ccae38733383efce'
+  end
 
   depends_on :python
   depends_on 'swig' => :build
@@ -29,8 +36,8 @@ class Saltstack < Formula
   end
 
   resource 'm2crypto' do
-    url 'https://pypi.python.org/packages/source/M/M2Crypto/M2Crypto-0.22.3.tar.gz'
-    sha1 'c5e39d928aff7a47e6d82624210a7a31b8220a50'
+    url 'https://pypi.python.org/packages/source/M/M2Crypto/M2Crypto-0.21.1.tar.gz'
+    sha1 '3c7135b952092e4f2eee7a94c5153319cccba94e'
   end
 
   resource 'pyyaml' do
@@ -44,23 +51,18 @@ class Saltstack < Formula
   end
 
   resource 'jinja2' do
-    url 'https://pypi.python.org/packages/source/J/Jinja2/Jinja2-2.7.2.tar.gz'
-    sha1 '1ce4c8bc722444ec3e77ef9db76faebbd17a40d8'
+    url 'https://pypi.python.org/packages/source/J/Jinja2/Jinja2-2.7.1.tar.gz'
+    sha1 'a9b24d887f2be772921b3ee30a0b9d435cffadda'
   end
 
   resource 'pyzmq' do
-    url 'https://pypi.python.org/packages/source/p/pyzmq/pyzmq-14.0.1.tar.gz'
-    sha1 'd09c72dc6dcad9449dbcb2f97b3cc1f2443d4b84'
+    url 'https://pypi.python.org/packages/source/p/pyzmq/pyzmq-14.0.0.tar.gz'
+    sha1 'a57a32f3fdedd7a9d3659926648a93895eb7c3c4'
   end
 
   resource 'msgpack-python' do
-    url 'https://pypi.python.org/packages/source/m/msgpack-python/msgpack-python-0.4.1.tar.gz'
-    sha1 'ae7b4d1afab10cd78baada026cad1ae92354852b'
-  end
-
-  resource 'apache-libcloud' do
-    url 'https://pypi.python.org/packages/source/a/apache-libcloud/apache-libcloud-0.14.1.tar.gz'
-    sha1 'e587c9c3519e7d061f3c2fb232af8ace593c8156'
+    url 'https://pypi.python.org/packages/source/m/msgpack-python/msgpack-python-0.4.0.tar.gz'
+    sha1 '5915f60033168a7b6f1e76ddb8a514f84ebcdf81'
   end
 
   def install
@@ -74,7 +76,6 @@ class Saltstack < Formula
     resource('markupsafe').stage { system "python", *install_args }
     resource('m2crypto').stage { system "python", *install_args }
     resource('jinja2').stage { system "python", *install_args }
-    resource('apache-libcloud').stage { system "python", *install_args }
 
     system "python", "setup.py", "install", "--prefix=#{prefix}"
 

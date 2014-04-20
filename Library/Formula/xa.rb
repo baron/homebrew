@@ -5,11 +5,13 @@ class Xa < Formula
   url 'http://www.floodgap.com/retrotech/xa/dists/xa-2.3.5.tar.gz'
   sha1 'd8f4564953adfcee69faacfa300b954875fabe21'
 
-  # From upstream: http://www.floodgap.com/retrotech/xa/xa-getline-patch.txt
-  # Filenames have been changed in the header ("xa.c" -> "a/src/xa.c")
-  # because the original patch can't be applied with -p0 or -p1.
-  # This fix will be in 2.3.6
-  patch :DATA
+  def patches
+    # From upstream: http://www.floodgap.com/retrotech/xa/xa-getline-patch.txt
+    # Filenames have been changed in the header ("xa.c" -> "a/src/xa.c")
+    # because the original patch can't be applied with -p0 or -p1.
+    # This fix will be in 2.3.6
+    DATA
+  end
 
   def install
     system "make", "CC=#{ENV.cc}",

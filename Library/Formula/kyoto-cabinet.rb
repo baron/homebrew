@@ -20,6 +20,12 @@ class KyotoCabinet < Formula
     system "make" # Separate steps required
     system "make install"
   end
+
+  def patches
+    if MacOS.version >= :mavericks
+      DATA
+    end
+  end
 end
 
 

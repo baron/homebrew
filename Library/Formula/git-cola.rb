@@ -2,8 +2,8 @@ require 'formula'
 
 class GitCola < Formula
   homepage 'http://git-cola.github.io/'
-  url 'https://github.com/git-cola/git-cola/archive/v2.0.2.tar.gz'
-  sha1 'e3357ca8dc6bce1e92f5195bbefc0a82edbff262'
+  url 'https://github.com/git-cola/git-cola/archive/v1.9.4.tar.gz'
+  sha1 '09f975daa863b08335a4dade66b4d218475a8957'
 
   head 'https://github.com/git-cola/git-cola.git'
 
@@ -11,7 +11,7 @@ class GitCola < Formula
 
   depends_on 'pyqt'
 
-  if build.with? "docs"
+  if build.include? 'with-docs'
     # these are needed to build man pages
     depends_on 'asciidoc'
     depends_on 'xmlto'
@@ -20,7 +20,7 @@ class GitCola < Formula
   def install
     system "make", "prefix=#{prefix}", "install"
 
-    if build.with? "docs"
+    if build.include? 'with-docs'
       system "make", "-C", "share/doc/git-cola",
                      "-f", "Makefile.asciidoc",
                      "prefix=#{prefix}",

@@ -10,11 +10,11 @@ class Tty
     def blue; bold 34; end
     def white; bold 39; end
     def red; underline 31; end
-    def yellow; underline 33; end
+    def yellow; underline 33 ; end
     def reset; escape 0; end
     def em; underline 39; end
-    def green; bold 32; end
-    def gray; bold 30; end
+    def green; color 92 end
+    def gray; bold 30 end
 
     def width
       `/usr/bin/tput cols`.strip.to_i
@@ -84,8 +84,8 @@ def interactive_shell f=nil
     ENV['HOMEBREW_DEBUG_INSTALL'] = f.name
   end
 
-  Process.wait fork { exec ENV['SHELL'] }
-
+  fork {exec ENV['SHELL'] }
+  Process.wait
   unless $?.success?
     puts "Aborting due to non-zero exit status"
     exit $?
@@ -95,13 +95,13 @@ end
 module Homebrew
   def self.system cmd, *args
     puts "#{cmd} #{args*' '}" if ARGV.verbose?
-    pid = fork do
+    fork do
       yield if block_given?
       args.collect!{|arg| arg.to_s}
       exec(cmd.to_s, *args) rescue nil
       exit! 1 # never gets here unless exec failed
     end
-    Process.wait(pid)
+    Process.wait
     $?.success?
   end
 end
@@ -136,10 +136,7 @@ def curl *args
   curl = Pathname.new '/usr/bin/curl'
   raise "#{curl} is not executable" unless curl.exist? and curl.executable?
 
-  flags = HOMEBREW_CURL_ARGS
-  flags = flags.delete("#") if ARGV.verbose?
-
-  args = [flags, HOMEBREW_USER_AGENT, *args]
+  args = [HOMEBREW_CURL_ARGS, HOMEBREW_USER_AGENT, *args]
   # See https://github.com/Homebrew/homebrew/issues/6103
   args << "--insecure" if MacOS.version < "10.6"
   args << "--verbose" if ENV['HOMEBREW_CURL_VERBOSE']
@@ -170,11 +167,8 @@ def puts_columns items, star_items=[]
 end
 
 def which cmd, path=ENV['PATH']
-  path.split(File::PATH_SEPARATOR).find do |p|
-    pcmd = File.join(p, cmd)
-    return Pathname.new(pcmd) if File.executable?(pcmd) && !File.directory?(pcmd)
-  end
-  return nil
+  dir = path.split(File::PATH_SEPARATOR).find {|p| File.executable? File.join(p, cmd)}
+  Pathname.new(File.join(dir, cmd)) unless dir.nil?
 end
 
 def which_editor
@@ -257,37 +251,9 @@ end
 module GitHub extend self
   ISSUES_URI = URI.parse("https://api.github.com/search/issues")
 
-  Error = Class.new(RuntimeError)
+  Error = Class.new(StandardError)
+  RateLimitExceededError = Class.new(Error)
   HTTPNotFoundError = Class.new(Error)
-
-  class RateLimitExceededError < Error
-    def initialize(reset, error)
-      super <<-EOS.undent
-        GitHub #{error}
-        Try again in #{pretty_ratelimit_reset(reset)}, or create an API token:
-          https://github.com/settings/applications
-        and then set HOMEBREW_GITHUB_API_TOKEN.
-        EOS
-    end
-
-    def pretty_ratelimit_reset(reset)
-      if (seconds = Time.at(reset) - Time.now) > 180
-        "%d minutes %d seconds" % [seconds / 60, seconds % 60]
-      else
-        "#{seconds} seconds"
-      end
-    end
-  end
-
-  class AuthenticationFailedError < Error
-    def initialize(error)
-      super <<-EOS.undent
-        GitHub #{error}
-        HOMEBREW_GITHUB_API_TOKEN may be invalid or expired, check:
-          https://github.com/settings/applications
-        EOS
-    end
-  end
 
   def open url, headers={}, &block
     # This is a no-op if the user is opting out of using the GitHub API.
@@ -305,49 +271,27 @@ module GitHub extend self
       yield Utils::JSON.load(f.read)
     end
   rescue OpenURI::HTTPError => e
-    handle_api_error(e)
+    if e.io.meta['x-ratelimit-remaining'].to_i <= 0
+      raise RateLimitExceededError, <<-EOS.undent, e.backtrace
+        GitHub #{Utils::JSON.load(e.io.read)['message']}
+        You may want to create an API token: https://github.com/settings/applications
+        and then set HOMEBREW_GITHUB_API_TOKEN.
+        EOS
+    elsif e.io.status.first == "404"
+      raise HTTPNotFoundError, e.message, e.backtrace
+    else
+      raise Error, e.message, e.backtrace
+    end
   rescue SocketError, OpenSSL::SSL::SSLError => e
     raise Error, "Failed to connect to: #{url}\n#{e.message}", e.backtrace
   rescue Utils::JSON::Error => e
     raise Error, "Failed to parse JSON response\n#{e.message}", e.backtrace
   end
 
-  def handle_api_error(e)
-    if e.io.meta["x-ratelimit-remaining"].to_i <= 0
-      reset = e.io.meta.fetch("x-ratelimit-reset").to_i
-      error = Utils::JSON.load(e.io.read)["message"]
-      raise RateLimitExceededError.new(reset, error)
-    end
-
-    case e.io.status.first
-    when "401", "403"
-      raise AuthenticationFailedError.new(e.message)
-    when "404"
-      raise HTTPNotFoundError, e.message, e.backtrace
-    else
-      raise Error, e.message, e.backtrace
-    end
-  end
-
-  def issues_matching(query, qualifiers={})
+  def issues_matching(query)
     uri = ISSUES_URI.dup
-    uri.query = build_query_string(query, qualifiers)
+    uri.query = "q=#{uri_escape(query)}+repo:Homebrew/homebrew&per_page=100"
     open(uri) { |json| json["items"] }
-  end
-
-  def build_query_string(query, qualifiers)
-    s = "q=#{uri_escape(query)}+"
-    s << build_search_qualifier_string(qualifiers)
-    s << "&per_page=100"
-  end
-
-  def build_search_qualifier_string(qualifiers)
-    {
-      :repo => "Homebrew/homebrew",
-      :in => "title",
-    }.update(qualifiers).map { |qualifier, value|
-      "#{qualifier}:#{value}"
-    }.join("+")
   end
 
   def uri_escape(query)
@@ -360,14 +304,25 @@ module GitHub extend self
   end
 
   def issues_for_formula name
-    issues_matching(name, :state => "open")
+    # bit basic as depends on the issue at github having the exact name of the
+    # formula in it. Which for stuff like objective-caml is unlikely. So we
+    # really should search for aliases too.
+
+    name = f.name if Formula === name
+
+    # don't include issues that just refer to the tool in their body
+    issues_matching(name).select {|issue| issue['title'].include? name }
   end
 
-  def print_pull_requests_matching(query)
-    return [] if ENV['HOMEBREW_NO_GITHUB_API']
+  def find_pull_requests rx
+    return if ENV['HOMEBREW_NO_GITHUB_API']
     puts "Searching pull requests..."
 
-    open_or_closed_prs = issues_matching(query, :type => "pr")
+    query = rx.source.delete('.*').gsub('\\', '')
+
+    open_or_closed_prs = issues_matching(query).select do |issue|
+      rx === issue["title"] && issue["pull_request"]["html_url"]
+    end
 
     open_prs = open_or_closed_prs.select {|i| i["state"] == "open" }
     if open_prs.any?
@@ -380,7 +335,7 @@ module GitHub extend self
       return
     end
 
-    prs.each { |i| puts "#{i["title"]} (#{i["html_url"]})" }
+    prs.each {|i| yield "#{i["title"]} (#{i["pull_request"]["html_url"]})" }
   end
 
   def private_repo?(user, repo)
