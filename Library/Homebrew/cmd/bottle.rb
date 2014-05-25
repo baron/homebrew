@@ -17,6 +17,9 @@ end
 
 BOTTLE_ERB = <<-EOS
   bottle do
+    <% if root_url != BottleSpecification.new.root_url %>
+    root_url "<%= root_url %>"
+    <% end %>
     <% if prefix.to_s != "/usr/local" %>
     prefix "<%= prefix %>"
     <% end %>
@@ -166,7 +169,14 @@ module Homebrew extend self
       end
     end
 
+<<<<<<< HEAD
     bottle = Bottle.new
+=======
+    root_url = ARGV.value("root_url")
+
+    bottle = BottleSpecification.new
+    bottle.root_url(root_url) if root_url
+>>>>>>> 5ae59887f8a721d2c098b4835ecc70dd6932e95a
     bottle.prefix HOMEBREW_PREFIX
     bottle.cellar relocatable ? :any : HOMEBREW_CELLAR
     bottle.revision bottle_revision
@@ -215,14 +225,22 @@ module Homebrew extend self
             string = s.sub!(/  bottle do.+?end\n/m, output)
             odie 'Bottle block replacement failed!' unless string
           else
+<<<<<<< HEAD
             update_or_add = 'update'
             string = s.sub!(/(  (url|sha1|sha256|head|version) '\S*'\n+)+/m, '\0' + output + "\n")
+=======
+            update_or_add = 'add'
+            string = s.sub!(/(  (url|sha1|sha256|head|version|mirror) ['"][\S ]+['"]\n+)+/m, '\0' + output + "\n")
+>>>>>>> 5ae59887f8a721d2c098b4835ecc70dd6932e95a
             odie 'Bottle block addition failed!' unless string
           end
         end
 
+        version = f.version.to_s
+        version += "_#{f.revision}" if f.revision.to_i > 0
+
         safe_system 'git', 'commit', '--no-edit', '--verbose',
-          "--message=#{f.name}: #{update_or_add} #{f.version} bottle.",
+          "--message=#{f.name}: #{update_or_add} #{version} bottle.",
           '--', f.path
       end
     end

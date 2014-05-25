@@ -2,21 +2,20 @@ require 'formula'
 
 class ErlangInstalled < Requirement
   fatal true
-  default_formula 'erlang'
   env :userpaths
 
   satisfy {
     erl = which('erl') and begin
-      `#{erl} -noshell -eval 'io:fwrite("~s~n", [erlang:system_info(otp_release)]).' -s erlang halt | grep -q '^R1[6789]'`
+      `#{erl} -noshell -eval 'io:fwrite("~s~n", [erlang:system_info(otp_release)]).' -s erlang halt | grep -q '^1[789]'`
       $?.exitstatus == 0
     end
   }
 
   def message; <<-EOS.undent
-    Erlang R16 is required to install.
+    Erlang 17 is required to install.
 
     You can install this with:
-      brew install erlang
+      brew install erlang --devel
 
     Or you can use an official installer from:
       http://www.erlang.org/
@@ -26,8 +25,8 @@ end
 
 class Elixir < Formula
   homepage 'http://elixir-lang.org/'
-  url  'https://github.com/elixir-lang/elixir/archive/v0.12.3.zip'
-  sha1 '35e9dd2dd58b816df4b93914c13bee29db2408e4'
+  url  'https://github.com/elixir-lang/elixir/archive/v0.13.3.tar.gz'
+  sha1 '973110c12e75d04ee68394a79e207b8c6b220d0b'
 
   head 'https://github.com/elixir-lang/elixir.git'
 

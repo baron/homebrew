@@ -30,14 +30,14 @@ def load_logs name
   logs = {}
   dir = (HOMEBREW_LOGS/name)
   dir.children.sort.each do |file|
-    logs[file.basename.to_s] = {:content => file.read}
+    logs[file.basename.to_s] = {:content => (file.size == 0 ? "empty log" : file.read)}
   end if dir.exist?
   raise 'No logs.' if logs.empty?
   logs
 end
 
 def append_config files
-  files['config.out'] = {:content => `brew --config 2>&1`}
+  files['config.out'] = {:content => `brew config 2>&1`}
 end
 
 def append_doctor files
