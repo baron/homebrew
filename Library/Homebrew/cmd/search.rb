@@ -1,17 +1,11 @@
 require 'formula'
 require 'blacklist'
 require 'utils'
+require 'thread'
 
 module Homebrew extend self
 
-<<<<<<< HEAD
-  # A regular expession to capture the username (one or more char but no `/`,
-  # which has to be escaped like `\/`), repository, followed by an optional `/`
-  # and an optional query.
-  TAP_QUERY_REGEX = /^([^\/]+)\/([^\/]+)\/?(.+)?$/
-=======
   SEARCH_ERROR_QUEUE = Queue.new
->>>>>>> 5ae59887f8a721d2c098b4835ecc70dd6932e95a
 
   def search
     if ARGV.include? '--macports'
@@ -61,17 +55,18 @@ module Homebrew extend self
       if count == 0 and not blacklisted? query
         puts "No formula found for #{query.inspect}."
         begin
-          GitHub.find_pull_requests(rx) { |pull| puts pull }
+          GitHub.print_pull_requests_matching(query)
         rescue GitHub::Error => e
-          opoo e.message
+          SEARCH_ERROR_QUEUE << e
         end
       end
     end
+
+    raise SEARCH_ERROR_QUEUE.pop unless SEARCH_ERROR_QUEUE.empty?
   end
 
   SEARCHABLE_TAPS = [
-    %w{josegonzalez php},
-    %w{marcqualie nginx},
+    %w{Homebrew nginx},
     %w{Homebrew apache},
     %w{Homebrew versions},
     %w{Homebrew dupes},
@@ -80,6 +75,7 @@ module Homebrew extend self
     %w{Homebrew completions},
     %w{Homebrew binary},
     %w{Homebrew python},
+    %w{Homebrew php},
   ]
 
   def query_regexp(query)
@@ -116,10 +112,6 @@ module Homebrew extend self
         end
       end
     end
-<<<<<<< HEAD
-    results
-  rescue GitHub::RateLimitExceededError => e
-=======
 
     paths = tree["Formula"] || tree["HomebrewFormula"] || tree["."] || []
     paths.each do |path|
@@ -128,11 +120,12 @@ module Homebrew extend self
     end
   rescue GitHub::HTTPNotFoundError => e
     opoo "Failed to search tap: #{user}/#{repo}. Please run `brew update`"
->>>>>>> 5ae59887f8a721d2c098b4835ecc70dd6932e95a
     []
   rescue GitHub::Error => e
-    opoo "Failed to search tap: #{user}/#{repo}. Please run `brew update`"
+    SEARCH_ERROR_QUEUE << e
     []
+  else
+    results
   end
 
   def search_formulae rx

@@ -7,14 +7,6 @@ require 'utils/inreplace'
 require 'erb'
 require 'extend/pathname'
 
-class BottleMerger < Formula
-  # This provides a URL and Version which are the only needed properties of
-  # a Formula. This object is used to access the Formula bottle DSL to merge
-  # multiple outputs of `brew bottle`.
-  url '1'
-  def self.reset_bottle; @bottle = Bottle.new; end
-end
-
 BOTTLE_ERB = <<-EOS
   bottle do
     <% if root_url != BottleSpecification.new.root_url %>
@@ -94,6 +86,19 @@ module Homebrew extend self
       result = true
     end
 
+    index = 0
+    keg.find do |pn|
+      if pn.symlink? && (link = pn.readlink).absolute?
+        if link.to_s.start_with?(string)
+          opoo "Absolute symlink starting with #{string}:" if index.zero?
+          puts "  #{pn} -> #{pn.resolved_path}"
+        end
+
+        index += 1
+        result = true
+      end
+    end
+
     result
   end
 
@@ -111,17 +116,26 @@ module Homebrew extend self
       return ofail "Formula not installed with '--build-bottle': #{f.name}"
     end
 
+    unless f.stable
+      return ofail "Formula has no stable version: #{f.name}"
+    end
+
     if ARGV.include? '--no-revision'
       bottle_revision = 0
     else
-      max = f.bottle_version_map('origin/master')[f.version].max
+      max = f.bottle_version_map('origin/master')[f.pkg_version].max
       bottle_revision = max ? max + 1 : 0
     end
 
-    filename = bottle_filename(f, :tag => bottle_tag, :revision => bottle_revision)
+    filename = bottle_filename(
+      :name => f.name,
+      :version => f.pkg_version,
+      :revision => bottle_revision,
+      :tag => bottle_tag
+    )
 
     if bottle_filename_formula_name(filename).empty?
-      return ofail "Add a new regex to bottle_version.rb to parse the bottle filename."
+      return ofail "Add a new regex to bottle_version.rb to parse #{f.version} from #{filename}"
     end
 
     bottle_path = Pathname.pwd/filename
@@ -138,11 +152,12 @@ module Homebrew extend self
       begin
         keg.relocate_install_names prefix, Keg::PREFIX_PLACEHOLDER,
           cellar, Keg::CELLAR_PLACEHOLDER, :keg_only => f.keg_only?
+        keg.delete_pyc_files!
 
         HOMEBREW_CELLAR.cd do
           # Use gzip, faster to compress than bzip2, faster to uncompress than bzip2
           # or an uncompressed tarball (and more bandwidth friendly).
-          safe_system 'tar', 'czf', bottle_path, "#{f.name}/#{f.version}"
+          safe_system 'tar', 'czf', bottle_path, "#{f.name}/#{f.pkg_version}"
         end
 
         if File.size?(bottle_path) > 1*1024*1024
@@ -169,14 +184,10 @@ module Homebrew extend self
       end
     end
 
-<<<<<<< HEAD
-    bottle = Bottle.new
-=======
     root_url = ARGV.value("root_url")
 
     bottle = BottleSpecification.new
     bottle.root_url(root_url) if root_url
->>>>>>> 5ae59887f8a721d2c098b4835ecc70dd6932e95a
     bottle.prefix HOMEBREW_PREFIX
     bottle.cellar relocatable ? :any : HOMEBREW_CELLAR
     bottle.revision bottle_revision
@@ -195,6 +206,12 @@ module Homebrew extend self
     end
   end
 
+  module BottleMerger
+    def bottle(&block)
+      instance_eval(&block)
+    end
+  end
+
   def merge
     merge_hash = {}
     ARGV.named.each do |argument|
@@ -203,15 +220,13 @@ module Homebrew extend self
       bottle_block = IO.read argument
       merge_hash[formula_name] << bottle_block
     end
-    merge_hash.keys.each do |formula_name|
-      BottleMerger.reset_bottle
+
+    merge_hash.each do |formula_name, bottle_blocks|
       ohai formula_name
-      bottle_blocks = merge_hash[formula_name]
-      bottle_blocks.each do |bottle_block|
-        BottleMerger.class_eval bottle_block
-      end
-      bottle = BottleMerger.new.bottle
-      next unless bottle
+
+      bottle = BottleSpecification.new.extend(BottleMerger)
+      bottle_blocks.each { |block| bottle.instance_eval(block) }
+
       output = bottle_output bottle
       puts output
 
@@ -221,17 +236,12 @@ module Homebrew extend self
 
         inreplace f.path do |s|
           if s.include? 'bottle do'
-            update_or_add = 'add'
-            string = s.sub!(/  bottle do.+?end\n/m, output)
-            odie 'Bottle block replacement failed!' unless string
-          else
-<<<<<<< HEAD
             update_or_add = 'update'
-            string = s.sub!(/(  (url|sha1|sha256|head|version) '\S*'\n+)+/m, '\0' + output + "\n")
-=======
+            string = s.sub!(/  bottle do.+?end\n/m, output)
+            odie 'Bottle block update failed!' unless string
+          else
             update_or_add = 'add'
             string = s.sub!(/(  (url|sha1|sha256|head|version|mirror) ['"][\S ]+['"]\n+)+/m, '\0' + output + "\n")
->>>>>>> 5ae59887f8a721d2c098b4835ecc70dd6932e95a
             odie 'Bottle block addition failed!' unless string
           end
         end

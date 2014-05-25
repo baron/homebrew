@@ -1,26 +1,4 @@
 TAP_MIGRATIONS = {
-<<<<<<< HEAD
-  'octave' => 'homebrew/science',
-  'opencv' => 'homebrew/science',
-  'grads' => 'homebrew/binary',
-  'denyhosts' => 'homebrew/boneyard',
-  'ipopt' => 'homebrew/science',
-  'qfits' => 'homebrew/boneyard',
-  'blackbox' => 'homebrew/boneyard',
-  'libgtextutils' => 'homebrew/science',
-  'syslog-ng' => 'homebrew/boneyard',
-  'librets' => 'homebrew/boneyard',
-  'drizzle' => 'homebrew/boneyard',
-  'boost149' => 'homebrew/versions',
-  'aimage' => 'homebrew/boneyard',
-  'cmucl' => 'homebrew/binary',
-  'lmutil' => 'homebrew/binary',
-  'jscoverage' => 'homebrew/boneyard',
-  'jsl' => 'homebrew/binary',
-  'nlopt' => 'homebrew/science',
-  'comparepdf' => 'homebrew/boneyard',
-  'colormake' => 'homebrew/headonly',
-=======
   "agedu" => "homebrew/headonly",
   "aimage" => "homebrew/boneyard",
   "apple-gcc42" => "homebrew/versions",
@@ -69,5 +47,4 @@ TAP_MIGRATIONS = {
   "tetgen" => "homebrew/science",
   "urweb" => "homebrew/boneyard",
   "wkhtmltopdf" => "homebrew/boneyard",
->>>>>>> 5ae59887f8a721d2c098b4835ecc70dd6932e95a
 }
