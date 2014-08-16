@@ -1,20 +1,21 @@
 require "formula"
 
 class Screenfetch < Formula
-  homepage "http://git.silverirc.com/cgit.cgi/screenfetch.git"
-  url "http://git.silverirc.com/cgit.cgi/screenfetch.git/snapshot/screenfetch-3.2.2.tar.bz2"
-  sha1 "29ec0d68b2799a946dc75b390d96e5f1b2bb8aaf"
+  homepage "https://github.com/KittyKatt/screenFetch"
+  url "https://github.com/KittyKatt/screenFetch/archive/v3.6.0.tar.gz"
+  sha1 "283f811cabe17e7ab78cd3bd1233cfc52d5bd7b5"
   head 'git://git.silverirc.com/screenfetch.git', :shallow => false
 
   bottle do
     cellar :any
-    sha1 "a0af0c7172066ca31cf6eb542a4e7b642dd79dc7" => :mavericks
-    sha1 "5ee15d688ee29db874a8171869bf0d8c970d8458" => :mountain_lion
-    sha1 "ae7d892faa753aca39548ad14a5f949216c76051" => :lion
+    sha1 "7d914abc94e2c9832976e251b6ddef04f61bdebf" => :mavericks
+    sha1 "5eeedcb79a31a0d11fa8fc076896889dfbdfdb0d" => :mountain_lion
+    sha1 "942fc704bef0d7e64ff9d90654d2ab6fdf5a28fd" => :lion
   end
 
   def install
     bin.install "screenfetch-dev" => "screenfetch"
+    man1.install "screenfetch.1"
   end
 
   test do

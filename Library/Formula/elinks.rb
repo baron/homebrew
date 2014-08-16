@@ -21,9 +21,9 @@ class Elinks < Formula
   head do
     url 'http://elinks.cz/elinks.git'
 
-    depends_on :autoconf
-    depends_on :automake
-    depends_on :libtool
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "libtool" => :build
   end
 
   depends_on "openssl"
@@ -44,6 +44,7 @@ class Elinks < Formula
       Hello world!
       <ol><li>one</li><li>two</li></ol>
     EOS
-    assert_match /^\s*Hello world!\n+ *1. one\n *2. two\s*$/, `elinks test.html`
+    assert_match /^\s*Hello world!\n+ *1. one\n *2. two\s*$/,
+                 shell_output("elinks test.html")
   end
 end

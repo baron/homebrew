@@ -1,14 +1,9 @@
 # This script is loaded by formula_installer as a separate instance.
-# Rationale: Formula can use __END__, Formula can change ENV
 # Thrown exceptions are propogated back to the parent process over a pipe
 
 STD_TRAP = trap("INT") { exit! 130 } # no backtrace thanks
 
-at_exit do
-  # the whole of everything must be run in at_exit because the formula has to
-  # be the run script as __END__ must work for *that* formula.
-  main
-end
+at_exit { main }
 
 require 'global'
 require 'cxxstdlib'
@@ -31,7 +26,6 @@ def main
 
   trap("INT", STD_TRAP) # restore default CTRL-C handler
 
-  require 'hardware'
   require 'keg'
   require 'extend/ENV'
 
@@ -40,7 +34,8 @@ def main
   # can be inconvenient for the user. But we need to be safe.
   system "/usr/bin/sudo", "-k"
 
-  Build.new(Formula.factory($0)).install
+  formula = Formulary.factory($0, ARGV.spec)
+  Build.new(formula).install
 rescue Exception => e
   unless error_pipe.nil?
     e.continuation = nil if ARGV.debug?
@@ -112,14 +107,13 @@ class Build
   def install
     keg_only_deps = deps.map(&:to_formula).select(&:keg_only?)
 
-    pre_superenv_hacks
-
-    ENV.activate_extensions!
-
     deps.map(&:to_formula).each do |dep|
-      opt = HOMEBREW_PREFIX/:opt/dep
+      opt = HOMEBREW_PREFIX.join("opt", dep.name)
       fixopt(dep) unless opt.directory?
     end
+
+    pre_superenv_hacks
+    ENV.activate_extensions!
 
     if superenv?
       ENV.keg_only_deps = keg_only_deps.map(&:name)
@@ -135,21 +129,20 @@ class Build
       deps.each(&:modify_build_environment)
 
       keg_only_deps.each do |dep|
-        opt = dep.opt_prefix
-        ENV.prepend_path 'PATH', "#{opt}/bin"
-        ENV.prepend_path 'PKG_CONFIG_PATH', "#{opt}/lib/pkgconfig"
-        ENV.prepend_path 'PKG_CONFIG_PATH', "#{opt}/share/pkgconfig"
-        ENV.prepend_path 'ACLOCAL_PATH', "#{opt}/share/aclocal"
-        ENV.prepend_path 'CMAKE_PREFIX_PATH', opt
-        ENV.prepend 'LDFLAGS', "-L#{opt}/lib" if (opt/:lib).directory?
-        ENV.prepend 'CPPFLAGS', "-I#{opt}/include" if (opt/:include).directory?
+        ENV.prepend_path "PATH", dep.opt_bin.to_s
+        ENV.prepend_path "PKG_CONFIG_PATH", "#{dep.opt_lib}/pkgconfig"
+        ENV.prepend_path "PKG_CONFIG_PATH", "#{dep.opt_share}/pkgconfig"
+        ENV.prepend_path "ACLOCAL_PATH", "#{dep.opt_share}/aclocal"
+        ENV.prepend_path "CMAKE_PREFIX_PATH", dep.opt_prefix.to_s
+        ENV.prepend "LDFLAGS", "-L#{dep.opt_lib}" if dep.opt_lib.directory?
+        ENV.prepend "CPPFLAGS", "-I#{dep.opt_include}" if dep.opt_include.directory?
       end
     end
 
     f.brew do
       if ARGV.flag? '--git'
-        system "git init"
-        system "git add -A"
+        system "git", "init"
+        system "git", "add", "-A"
       end
       if ARGV.interactive?
         ohai "Entering interactive mode"
@@ -170,30 +163,6 @@ class Build
 
         begin
           f.install
-
-          # This first test includes executables because we still
-          # want to record the stdlib for something that installs no
-          # dylibs.
-          stdlibs = Keg.new(f.prefix).detect_cxx_stdlibs
-          # This currently only tracks a single C++ stdlib per dep,
-          # though it's possible for different libs/executables in
-          # a given formula to link to different ones.
-          stdlib_in_use = CxxStdlib.new(stdlibs.first, ENV.compiler)
-          begin
-            stdlib_in_use.check_dependencies(f, deps)
-          rescue IncompatibleCxxStdlibs => e
-            opoo e.message
-          end
-
-          # This second check is recorded for checking dependencies,
-          # so executable are irrelevant at this point. If a piece
-          # of software installs an executable that links against libstdc++
-          # and dylibs against libc++, libc++-only dependencies can safely
-          # link against it.
-          stdlibs = Keg.new(f.prefix).detect_cxx_stdlibs :skip_executables => true
-
-          Tab.create(f, ENV.compiler, stdlibs.first,
-            Options.coerce(ARGV.options_only)).write
         rescue Exception => e
           if ARGV.debug?
             debrew e, f
@@ -202,24 +171,51 @@ class Build
           end
         end
 
+        stdlibs = detect_stdlibs
+        Tab.create(f, ENV.compiler, stdlibs.first, f.build).write
+
         # Find and link metafiles
         f.prefix.install_metafiles Pathname.pwd
       end
     end
   end
-end
 
-def fixopt f
-  path = if f.linked_keg.directory? and f.linked_keg.symlink?
-    f.linked_keg.resolved_path
-  elsif f.prefix.directory?
-    f.prefix
-  elsif (kids = f.rack.children).size == 1 and kids.first.directory?
-    kids.first
-  else
-    raise
+  def detect_stdlibs
+    keg = Keg.new(f.prefix)
+    # This first test includes executables because we still
+    # want to record the stdlib for something that installs no
+    # dylibs.
+    stdlibs = keg.detect_cxx_stdlibs
+    # This currently only tracks a single C++ stdlib per dep,
+    # though it's possible for different libs/executables in
+    # a given formula to link to different ones.
+    stdlib_in_use = CxxStdlib.create(stdlibs.first, ENV.compiler)
+    begin
+      stdlib_in_use.check_dependencies(f, deps)
+    rescue IncompatibleCxxStdlibs => e
+      opoo e.message
+    end
+
+    # This second check is recorded for checking dependencies,
+    # so executable are irrelevant at this point. If a piece
+    # of software installs an executable that links against libstdc++
+    # and dylibs against libc++, libc++-only dependencies can safely
+    # link against it.
+    keg.detect_cxx_stdlibs(:skip_executables => true)
   end
-  Keg.new(path).optlink
-rescue StandardError
-  raise "#{f.opt_prefix} not present or broken\nPlease reinstall #{f}. Sorry :("
+
+  def fixopt f
+    path = if f.linked_keg.directory? and f.linked_keg.symlink?
+      f.linked_keg.resolved_path
+    elsif f.prefix.directory?
+      f.prefix
+    elsif (kids = f.rack.children).size == 1 and kids.first.directory?
+      kids.first
+    else
+      raise
+    end
+    Keg.new(path).optlink
+  rescue StandardError
+    raise "#{f.opt_prefix} not present or broken\nPlease reinstall #{f}. Sorry :("
+  end
 end

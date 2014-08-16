@@ -24,12 +24,13 @@ class Wine < Formula
   end
 
   devel do
-    url "https://downloads.sourceforge.net/project/wine/Source/wine-1.7.19.tar.bz2"
-    sha256 "c5ea9b00c9029ecf47a25881b284d8ea02079dfbabc22aa789d6d07e38b32ff2"
+    url "https://downloads.sourceforge.net/project/wine/Source/wine-1.7.24.tar.bz2"
+    sha256 "5e9a9f250b6eb703cdc13c6dcfe025958dadddfdd3f8e683f46c2d642b5ec749"
 
-    # http://bugs.winehq.org/show_bug.cgi?id=34166
+    # Patch to fix screen-flickering issues. Still relevant on 1.7.23.
+    # https://bugs.winehq.org/show_bug.cgi?id=34166
     patch do
-      url "http://bugs.winehq.org/attachment.cgi?id=47639"
+      url "https://bugs.winehq.org/attachment.cgi?id=47639"
       sha1 "c195f4b9c0af450c7dc3f396e8661ea5248f2b01"
     end
   end
@@ -52,6 +53,7 @@ class Wine < Formula
   depends_on 'little-cms2'
   depends_on 'libicns'
   depends_on 'libtiff'
+  depends_on "samba" => :optional if !build.stable?
   depends_on 'sane-backends'
   depends_on 'libgsm' => :optional
 
@@ -72,8 +74,8 @@ class Wine < Formula
   end
 
   fails_with :clang do
-    build 421
-    cause 'error: invalid operand for instruction lretw'
+    build 425
+    cause "Clang prior to Xcode 5 miscompiles some parts of wine"
   end
 
   # These libraries are not specified as dependencies, or not built as 32-bit:
@@ -103,14 +105,8 @@ class Wine < Formula
     ENV.append "CFLAGS", build32
     ENV.append "LDFLAGS", build32
 
-    # The clang that comes with Xcode 5 no longer miscompiles wine. Tested with 1.7.3.
-    if ENV.compiler == :clang and MacOS.clang_build_version < 500
-      opoo <<-EOS.undent
-        Clang currently miscompiles some parts of Wine.
-        If you have GCC, you can get a more stable build with:
-          brew install wine --cc=gcc-4.2 # or 4.7, 4.8, etc.
-      EOS
-    end
+    # Help configure find libxml2 in an XCode only (no CLT) installation.
+    ENV.libxml2
 
     args = ["--prefix=#{prefix}"]
     args << "--disable-win16" if MacOS.version <= :leopard or ENV.compiler == :clang

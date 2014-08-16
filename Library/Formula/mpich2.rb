@@ -4,9 +4,9 @@ require 'formula'
 # formula renames, see homebrew issue #14374.
 class Mpich2 < Formula
   homepage 'http://www.mpich.org/'
-  url 'http://www.mpich.org/static/downloads/3.0.4/mpich-3.0.4.tar.gz'
-  mirror 'http://fossies.org/linux/misc/mpich-3.0.4.tar.gz'
-  sha1 'e89cc8de89d18d5718f7b881f3835b5a0943f897'
+  url 'http://www.mpich.org/static/downloads/3.1.2/mpich-3.1.2.tar.gz'
+  mirror 'http://fossies.org/linux/misc/mpich-3.1.2.tar.gz'
+  sha1 'c5199be7e9f1843b288dba0faf2c071c7a8e999d'
 
   head do
     url 'git://git.mpich.org/mpich.git'
@@ -14,11 +14,6 @@ class Mpich2 < Formula
     depends_on 'autoconf' => :build
     depends_on 'automake' => :build
     depends_on 'libtool'  => :build
-  end
-
-  devel do
-    url 'http://www.mpich.org/static/downloads/3.1rc3/mpich-3.1rc3.tar.gz'
-    sha1 '5dc3aff479df6b88328f9800652eae3b0ec587e7'
   end
 
   option 'disable-fortran', "Do not attempt to build Fortran bindings"
@@ -55,9 +50,7 @@ class Mpich2 < Formula
       "--prefix=#{prefix}",
       "--mandir=#{man}"
     ]
-    if build.include? 'disable-fortran'
-      args << "--disable-f77" << "--disable-fc"
-    end
+    args << "--disable-fortran" if build.include? "disable-fortran"
 
     # MPICH configure up to version 3.0.4 defaults to "--disable-shared"
     if build.include? 'enable-shared'

@@ -2,18 +2,18 @@ require "formula"
 
 class Mongodb < Formula
   homepage "http://www.mongodb.org/"
-  url "http://downloads.mongodb.org/src/mongodb-src-r2.6.1.tar.gz"
-  sha1 "3e069329e93a45f14bb86618eceea08d376dbc82"
+  url "http://downloads.mongodb.org/src/mongodb-src-r2.6.4.tar.gz"
+  sha1 "16dda6d8b1156194fc09b5ad72e58612d06abada"
 
   bottle do
-    sha1 "091cafed1db9c96b4487a806f61df8ba0c3523b4" => :mavericks
-    sha1 "3a91d1ed6e1e75f48e6fc241a0cc3fba9d8aa810" => :mountain_lion
-    sha1 "3ffe58f9e71dfd0700e08651f272f7a511dbb8d2" => :lion
+    sha1 "3c4dbe78cb9a2f424c3a8097ac58506a44eca310" => :mavericks
+    sha1 "d703fc432fdab74f8a5719916e90b2d169d7a66c" => :mountain_lion
+    sha1 "19f8563ca909b71f0306bad92f4bf585f54f2c11" => :lion
   end
 
   devel do
-     url "http://downloads.mongodb.org/src/mongodb-src-r2.7.0.tar.gz"
-     sha1 "43449a69c3386e13fdb6abb2b13933f3ba607cc5"
+    url "http://downloads.mongodb.org/src/mongodb-src-r2.7.4.tar.gz"
+    sha1 "e2abb0cf6923e9480cc02c2ab943264b4451632e"
   end
 
   head "https://github.com/mongodb/mongo.git"
@@ -21,6 +21,7 @@ class Mongodb < Formula
   option "with-boost", "Compile using installed boost, not the version shipped with mongodb"
   depends_on "boost" => :optional
 
+  depends_on :macos => :snow_leopard
   depends_on "scons" => :build
   depends_on "openssl" => :optional
 
