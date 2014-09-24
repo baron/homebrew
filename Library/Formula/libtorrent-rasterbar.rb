@@ -2,8 +2,8 @@ require "formula"
 
 class LibtorrentRasterbar < Formula
   homepage "http://www.rasterbar.com/products/libtorrent/"
-  url "https://downloads.sourceforge.net/project/libtorrent/libtorrent/libtorrent-rasterbar-1.0.1.tar.gz"
-  sha1 "98f0117bb716cc6210d5698068aa491bc0ac8ad0"
+  url "https://downloads.sourceforge.net/project/libtorrent/libtorrent/libtorrent-rasterbar-1.0.2.tar.gz"
+  sha1 "bfb161825306abbd5c03775e75f5e094ee757a9a"
 
   head do
     url "https://libtorrent.googlecode.com/svn/trunk"
@@ -14,9 +14,9 @@ class LibtorrentRasterbar < Formula
 
   bottle do
     cellar :any
-    sha1 "cfc1265a3205ffb86a73264b78c4bbc98b6af91c" => :mavericks
-    sha1 "af18735260a33d995f83af5d471956cc5de0615c" => :mountain_lion
-    sha1 "0293c0f3b0670c684ff408a87a43637386981aa5" => :lion
+    sha1 "969616cddd409eec6d15d59dcf91cf71d8860d7a" => :mavericks
+    sha1 "8f4d2b6d1cd95bf981afcf9b0f6459149a266cd8" => :mountain_lion
+    sha1 "328c41126de1a7e6dd660ce04bb7c6c154b0cd64" => :lion
   end
 
   depends_on "pkg-config" => :build

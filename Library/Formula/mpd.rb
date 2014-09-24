@@ -2,16 +2,13 @@ require 'formula'
 
 class Mpd < Formula
   homepage "http://www.musicpd.org/"
-
-  stable do
-    url "http://www.musicpd.org/download/mpd/0.18/mpd-0.18.12.tar.xz"
-    sha1 "99ba27a541cb18fcd093d93551d34c1c3145ba49"
-  end
+  url "http://www.musicpd.org/download/mpd/0.18/mpd-0.18.14.tar.xz"
+  sha1 "5a4b5f5b0447994f3fc186ffd7c16cabeeed2978"
 
   bottle do
-    sha1 "ab143fb0d51c515e3843f5d9ec94049c38dee147" => :mavericks
-    sha1 "3a9031df83d678a8bfe8ee3a44df5fb9582acacd" => :mountain_lion
-    sha1 "a378b8824edd4324823a6be70cbb6ff301ecc90d" => :lion
+    sha1 "b611883e7d96de9695bc3405d08776103e34bab7" => :mavericks
+    sha1 "eb9558e40e30a897b342ef47f568d19775983ec7" => :mountain_lion
+    sha1 "7b57946f8fe8ccdd7077cb8c8a263ea817571807" => :lion
   end
 
   head do
@@ -117,6 +114,31 @@ class Mpd < Formula
         --lastfm            -> --with-lastfm
         --libwrap           -> --with-libwrap (unsupported in OSX >= 10.8)
         --enable-soundcloud -> --with-yajl
+    EOS
+  end
+
+  plist_options :manual => "mpd"
+
+  def plist; <<-EOS.undent
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+        <key>Label</key>
+        <string>#{plist_name}</string>
+        <key>WorkingDirectory</key>
+        <string>#{HOMEBREW_PREFIX}</string>
+        <key>ProgramArguments</key>
+        <array>
+            <string>#{opt_bin}/mpd</string>
+            <string>--no-daemon</string>
+        </array>
+        <key>RunAtLoad</key>
+        <true/>
+        <key>KeepAlive</key>
+        <true/>
+    </dict>
+    </plist>
     EOS
   end
 end

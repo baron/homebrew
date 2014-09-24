@@ -16,25 +16,17 @@ class Mpich2 < Formula
     depends_on 'libtool'  => :build
   end
 
+  devel do
+    url 'http://www.mpich.org/static/downloads/3.2a1/mpich-3.2a1.tar.gz'
+    sha1 'aa54439bfb1c9b03231cb4d574b9365c94155293'
+  end
+
   option 'disable-fortran', "Do not attempt to build Fortran bindings"
-  option 'enable-shared', "Build shared libraries (default for versions > 3.0.4)"
-  option 'disable-shared', "Do not build shared libraries (default for versions <= 3.0.4)"
+  option 'disable-shared', "Do not build shared libraries"
 
   depends_on :fortran unless build.include? 'disable-fortran'
 
   conflicts_with 'open-mpi', :because => 'both install mpi__ compiler wrappers'
-
-  # fails with clang from Xcode 4.5.1 on 10.7 and 10.8 (see #15533)
-  # linker bug appears to have been fixed by Xcode 4.6
-  fails_with :clang do
-    build 421
-    cause <<-EOS.undent
-      Clang generates code that causes the linker to segfault when building
-      MPICH with shared libraries.  Specific message:
-
-          collect2: ld terminated with signal 11 [Segmentation fault: 11]
-      EOS
-  end if build.include? 'enable-shared'
 
   def install
     if build.head?
@@ -52,10 +44,7 @@ class Mpich2 < Formula
     ]
     args << "--disable-fortran" if build.include? "disable-fortran"
 
-    # MPICH configure up to version 3.0.4 defaults to "--disable-shared"
-    if build.include? 'enable-shared'
-      args << "--enable-shared"
-    elsif build.include? 'disable-shared'
+    if build.include? 'disable-shared'
       args << "--disable-shared"
     end
 
@@ -64,7 +53,7 @@ class Mpich2 < Formula
     system "make install"
   end
 
-  def test
+  test do
     # a better test would be to build and run a small MPI program
     system "#{bin}/mpicc", "-show"
   end
