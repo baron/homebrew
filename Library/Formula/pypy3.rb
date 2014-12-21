@@ -2,24 +2,24 @@ require "formula"
 
 class Pypy3 < Formula
   homepage "http://pypy.org/"
-  url "https://bitbucket.org/pypy/pypy/downloads/pypy3-2.3.1-src.tar.bz2"
-  sha1 "b9a0d9759f6f383e5c9edab4a21c3b8768f28dbd"
+  url "https://bitbucket.org/pypy/pypy/downloads/pypy3-2.4.0-src.tar.bz2"
+  sha1 "438572443ae6f54eb6122d807f104787c5247e01"
+
   bottle do
     cellar :any
-    sha1 "51f93930d175a44e6f97aa7827f46f1e009f0c1a" => :mavericks
-    sha1 "298a86ebee02ba6669887c9ae4bb880d2ddbbf6d" => :mountain_lion
-    sha1 "edf9c97210ef71120a8691d6c04a81ac18f3f234" => :lion
+    revision 4
+    sha1 "436d9f72ecfe83b50a045a68874d7aaab67fbe7d" => :yosemite
+    sha1 "cce8dc0fd43e58d962b0747a4901f261d2ccd287" => :mavericks
+    sha1 "94d8d0bbf5baffac4c453e742686f2380d5e7f2d" => :mountain_lion
   end
-
-  revision 1
 
   depends_on :arch => :x86_64
   depends_on "pkg-config" => :build
   depends_on "openssl"
 
   resource "setuptools" do
-    url "https://pypi.python.org/packages/source/s/setuptools/setuptools-6.0.2.tar.gz"
-    sha1 "a29a81b7913151697cb15b069844af75d441408f"
+    url "https://pypi.python.org/packages/source/s/setuptools/setuptools-8.2.1.tar.gz"
+    sha1 "ddb4454303142be3446437e4fafb13bbd4570133"
   end
 
   resource "pip" do
@@ -39,7 +39,7 @@ class Pypy3 < Formula
 
     Dir.chdir "pypy/goal" do
       system "python", buildpath/"rpython/bin/rpython",
-             "-Ojit", "--shared", "--cc", ENV["CC"], "--translation-verbose",
+             "-Ojit", "--shared", "--cc", ENV.cc, "--translation-verbose",
              "--make-jobs", ENV.make_jobs, "targetpypystandalone.py"
       system "install_name_tool", "-change", "libpypy-c.dylib", libexec/"lib/libpypy3-c.dylib", "pypy-c"
       system "install_name_tool", "-id", opt_libexec/"lib/libpypy3-c.dylib", "libpypy-c.dylib"
@@ -59,6 +59,12 @@ class Pypy3 < Formula
   end
 
   def post_install
+    # Precompile cffi extensions in lib_pypy
+    # list from create_cffi_import_libraries in pypy/tool/release/package.py
+    %w[_sqlite3 _curses syslog gdbm _tkinter].each do |module_name|
+      quiet_system bin/"pypy3", "-c", "import #{module_name}"
+    end
+
     # Post-install, fix up the site-packages and install-scripts folders
     # so that user-installed Python software survives minor updates, such
     # as going from 1.7.0 to 1.7.1.
@@ -103,7 +109,7 @@ class Pypy3 < Formula
     To update setuptools and pip between pypy3 releases, run:
         #{scripts_folder}/pip install --upgrade setuptools pip
 
-    See: https://github.com/Homebrew/homebrew/wiki/Homebrew-and-Python
+    See: https://github.com/Homebrew/homebrew/blob/master/share/doc/homebrew/Homebrew-and-Python.md
     EOS
   end
 

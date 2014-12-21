@@ -2,13 +2,20 @@ require 'formula'
 
 class ScmManager < Formula
   homepage 'http://www.scm-manager.org'
-  url 'http://maven.scm-manager.org/nexus/content/repositories/releases/sonia/scm/scm-server/1.41/scm-server-1.41-app.tar.gz'
-  version '1.41'
-  sha1 'b8dfa7b1c5c009b2633f89655a1df631a7d5afd4'
+  url 'http://maven.scm-manager.org/nexus/content/repositories/releases/sonia/scm/scm-server/1.43/scm-server-1.43-app.tar.gz'
+  version '1.43'
+  sha1 'afaf2a416400a4075fe629659836e29ddf262295'
+
+  bottle do
+    sha1 "d874a0767dcc261ec6a6410199da7cefe75c6d0d" => :yosemite
+    sha1 "8a65af08420cea107814a993fc315359f34a8c6d" => :mavericks
+    sha1 "6e27729657c1609979d5264a66fc97c132f8ea0c" => :mountain_lion
+  end
 
   resource 'client' do
-    url 'http://maven.scm-manager.org/nexus/content/repositories/releases/sonia/scm/clients/scm-cli-client/1.41/scm-cli-client-1.41-jar-with-dependencies.jar'
-    sha1 '26e969810c87924da3018e4a7bae6685deb717fc'
+    url 'http://maven.scm-manager.org/nexus/content/repositories/releases/sonia/scm/clients/scm-cli-client/1.43/scm-cli-client-1.43-jar-with-dependencies.jar'
+    version '1.43'
+    sha1 '7608231db16c9edf62ad2cab9fb486430779139a'
   end
 
   def install

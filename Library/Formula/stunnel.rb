@@ -2,14 +2,14 @@ require "formula"
 
 class Stunnel < Formula
   homepage "https://www.stunnel.org/"
-  url "ftp://ftp.nluug.nl/pub/networking/stunnel/stunnel-5.05.tar.gz"
-  mirror "https://www.stunnel.org/downloads/stunnel-5.05.tar.gz"
-  sha256 "c7e1653345150db7e48d00e1129cf571c7c85de8e7e1aa70b21cf1d76b1e31ef"
+  url "https://www.stunnel.org/downloads/stunnel-5.08.tar.gz"
+  mirror "http://www.usenix.org.uk/mirrors/stunnel/stunnel-5.08.tar.gz"
+  sha256 "830b21d24cd237e96f4d7993be43553d4eba4d3cfa2660faa78dec8d41d314fc"
 
   bottle do
-    sha1 "f1b5731e9c6191035797f0d046915a5cf34205bd" => :mavericks
-    sha1 "4a52a8dd2df0b0e1d0815fc75eca918546f08e86" => :mountain_lion
-    sha1 "d15b1611c5afd9f308d825ea1f03d0d926124019" => :lion
+    sha1 "aab0c4a1dcdfcdfdac9d9b9c06fda6b1933475af" => :yosemite
+    sha1 "4f3e8b4b30793258391cd9b355e15e8f4b3e5f56" => :mavericks
+    sha1 "48d18d655dd0a75a28488cc9c244ee6d99c55849" => :mountain_lion
   end
 
   depends_on "openssl"
@@ -56,7 +56,7 @@ class Stunnel < Formula
                           "--mandir=#{man}",
                           "--disable-libwrap",
                           "--with-ssl=#{Formula["openssl"].opt_prefix}"
-    system "make", "install"
+    system "make", "install", "cert"
   end
 
   def caveats

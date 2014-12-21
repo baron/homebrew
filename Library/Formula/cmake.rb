@@ -25,16 +25,24 @@ class Cmake < Formula
   url "http://www.cmake.org/files/v3.0/cmake-3.0.2.tar.gz"
   sha1 "379472e3578902a1d6f8b68a9987773151d6f21a"
 
-  head "http://cmake.org/cmake.git"
+  head do
+    url "http://cmake.org/cmake.git"
+
+    depends_on "xz" # For LZMA
+  end
 
   bottle do
     cellar :any
+    sha1 "29e403721a38731bb3015008b1fe39d0d334c11f" => :yosemite
     sha1 "4b8b26f60d28c85c0119cb9ab136c5b40f8db570" => :mavericks
     sha1 "a7bc77aa9b9855e5d4081ec689bb62c89be7c25d" => :mountain_lion
     sha1 "842240c9febb4123918cf62a3cea5ca4207ad860" => :lion
   end
 
-  depends_on :python => :build if MacOS.version <= :snow_leopard
+  option "without-docs", "Don't build man pages"
+  depends_on :python => :build if MacOS.version <= :snow_leopard && build.with?("docs")
+
+  depends_on "qt" => :optional
 
   resource "sphinx" do
     url "https://pypi.python.org/packages/source/S/Sphinx/Sphinx-1.2.3.tar.gz"
@@ -64,16 +72,18 @@ class Cmake < Formula
   depends_on NoExpatFramework
 
   def install
-    ENV.prepend_create_path "PYTHONPATH", buildpath+"sphinx/lib/python2.7/site-packages"
-    %w[markupsafe docutils pygments jinja2 sphinx].each do |r|
-      resource(r).stage do
-        system "python", "setup.py", "install", "--prefix=#{buildpath}/sphinx"
+    if build.with? "docs"
+      ENV.prepend_create_path "PYTHONPATH", buildpath+"sphinx/lib/python2.7/site-packages"
+      resources.each do |r|
+        r.stage do
+          system "python", *Language::Python.setup_install_args(buildpath/"sphinx")
+        end
       end
-    end
 
-    # There is an existing issue around OS X & Python locale setting
-    # See http://bugs.python.org/issue18378#msg215215 for explanation
-    ENV["LC_ALL"] = "en_US.UTF-8"
+      # There is an existing issue around OS X & Python locale setting
+      # See http://bugs.python.org/issue18378#msg215215 for explanation
+      ENV["LC_ALL"] = "en_US.UTF-8"
+    end
 
     args = %W[
       --prefix=#{prefix}
@@ -82,13 +92,18 @@ class Cmake < Formula
       --datadir=/share/cmake
       --docdir=/share/doc/cmake
       --mandir=/share/man
-      --sphinx-man
-      --sphinx-build=#{buildpath}/sphinx/bin/sphinx-build
     ]
+
+    if build.with? "docs"
+      args << "--sphinx-man" << "--sphinx-build=#{buildpath}/sphinx/bin/sphinx-build"
+    end
+
+    args << "--qt-gui" if build.with? "qt"
 
     system "./bootstrap", *args
     system "make"
     system "make", "install"
+    bin.install_symlink Dir["#{prefix}/CMake.app/Contents/bin/*"] if build.with? "qt"
   end
 
   test do
