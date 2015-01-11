@@ -21,6 +21,7 @@ class Capstone < Formula
 
     ENV["HOMEBREW_CAPSTONE"] = "1"
     system "./make.sh"
+    ENV["PREFIX"] = prefix
     system "./make.sh", "install"
   end
 

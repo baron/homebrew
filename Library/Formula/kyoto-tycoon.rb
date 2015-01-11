@@ -27,6 +27,12 @@ class KyotoTycoon < Formula
     system "make"
     system "make install"
   end
+
+  def patches
+    if MacOS.version >= :mavericks
+      DATA
+    end
+  end
 end
 
 

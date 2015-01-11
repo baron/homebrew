@@ -11,7 +11,7 @@ class Montage < Formula
   end
 
   # fix function not being declared void
-  patch :DATA
+  def patches; DATA; end
 
   def caveats; <<-EOS.undent
     Montage is under the Caltech/JPL non-exclusive, non-commercial software

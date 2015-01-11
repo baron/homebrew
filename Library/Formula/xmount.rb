@@ -11,7 +11,9 @@ class Xmount < Formula
   depends_on :osxfuse
   depends_on "libewf"
 
-  patch :DATA
+  def patches
+    DATA
+  end
 
   def install
     system "aclocal -I #{HOMEBREW_PREFIX}/share/aclocal"
@@ -19,6 +21,12 @@ class Xmount < Formula
     system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}"
     system "make", "install"
+  end
+
+  def caveats; <<-EOS.undent
+    Make sure to follow the directions given by 'brew info osxfuse'
+    before trying to use a FUSE-based filesystem.
+    EOS
   end
 end
 

@@ -13,8 +13,8 @@ class Pyqt < Formula
   option "without-python", "Build without python 2 support"
   depends_on :python3 => :optional
 
-  if build.without?("python3") && build.without?("python")
-    odie "pyqt: --with-python3 must be specified when using --without-python"
+  if (build.without? "python3") && (build.without? "python")
+   odie "pyqt: --with-python3 must be specified when using --without-python"
   end
 
   depends_on "qt"
@@ -85,8 +85,11 @@ class Pyqt < Formula
       QtNetwork.QNetworkAccessManager().networkAccessible()
     EOS
 
-    Language::Python.each_python(build) do |python, version|
+    python_path = ENV["PYTHONPATH"]
+    pythons.each do |python, version|
+      ENV.append_path "PYTHONPATH", HOMEBREW_PREFIX/"lib/python#{version}/site-packages"
       system python, "test.py"
+      ENV["PYTHONPATH"] = python_path if pythons.length > 1
     end
   end
 end

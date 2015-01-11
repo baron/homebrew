@@ -24,6 +24,7 @@ class Pango < Formula
   option :universal
 
   depends_on 'pkg-config' => :build
+  depends_on 'xz' => :build
   depends_on 'glib'
   depends_on 'cairo'
   depends_on 'harfbuzz'
@@ -60,7 +61,7 @@ class Pango < Formula
     system "make install"
   end
 
-  test do
+  def test
     system "#{bin}/pango-querymodules", "--version"
   end
 end

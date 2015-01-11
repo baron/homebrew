@@ -15,7 +15,7 @@ class GitCola < Formula
 
   depends_on "pyqt"
 
-  if build.with? "docs"
+  if build.include? 'with-docs'
     # these are needed to build man pages
     depends_on "asciidoc"
     depends_on "xmlto"
@@ -24,7 +24,7 @@ class GitCola < Formula
   def install
     system "make", "prefix=#{prefix}", "install"
 
-    if build.with? "docs"
+    if build.include? 'with-docs'
       system "make", "-C", "share/doc/git-cola",
                      "-f", "Makefile.asciidoc",
                      "prefix=#{prefix}",

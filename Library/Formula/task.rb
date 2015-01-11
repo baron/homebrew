@@ -1,5 +1,13 @@
 require 'formula'
 
+class TaskwarriorDownloadStrategy < GitDownloadStrategy
+  # CMakeLists.txt requires presence of .git to generate commit.h
+  # (version information), otherwise make fails.
+  def support_depth?
+    false
+  end
+end
+
 class Task < Formula
   homepage 'http://www.taskwarrior.org/'
   url 'http://www.taskwarrior.org/download/task-2.3.0.tar.gz'

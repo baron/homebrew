@@ -45,6 +45,12 @@ class Erlang < Formula
 
   fails_with :llvm
 
+  def patches
+    # Fixes problem with ODBC on Mavericks. Fixed upstream/HEAD:
+    # https://github.com/erlang/otp/pull/142
+    DATA if MacOS.version >= :mavericks && !build.head?
+  end
+
   def install
     # Unset these so that building wx, kernel, compiler and
     # other modules doesn't fail with an unintelligable error.
@@ -61,7 +67,6 @@ class Erlang < Formula
       --prefix=#{prefix}
       --enable-kernel-poll
       --enable-threads
-      --enable-sctp
       --enable-dynamic-ssl-lib
       --with-ssl=#{Formula["openssl"].opt_prefix}
       --enable-shared-zlib
@@ -73,16 +78,10 @@ class Erlang < Formula
     args << "--enable-dirty-schedulers" if build.with? "dirty-schedulers"
     args << "--enable-wx" if build.with? "wxmac"
 
-    if MacOS.version >= :snow_leopard and MacOS::CLT.installed?
-      args << "--with-dynamic-trace=dtrace"
-    end
-
-    if build.include? 'disable-hipe'
+    unless build.include? 'disable-hipe'
       # HIPE doesn't strike me as that reliable on OS X
       # http://syntatic.wordpress.com/2008/06/12/macports-erlang-bus-error-due-to-mac-os-x-1053-update/
       # http://www.erlang.org/pipermail/erlang-patches/2008-September/000293.html
-      args << '--disable-hipe'
-    else
       args << '--enable-hipe'
     end
 
@@ -99,7 +98,7 @@ class Erlang < Formula
 
   def caveats; <<-EOS.undent
     Man pages can be found in:
-      #{opt_lib}/erlang/man
+      #{opt_prefix}/lib/erlang/man
 
     Access them with `erl -man`, or add this directory to MANPATH.
     EOS

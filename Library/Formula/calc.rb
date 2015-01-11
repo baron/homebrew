@@ -34,4 +34,10 @@ class Calc < Formula
   test do
     assert_equal "11", shell_output("#{bin}/calc 0xA + 1").strip
   end
+
+  test do
+    output = `#{bin}/calc 0xA + 1`.strip
+    assert_equal "11", output
+    assert_equal 0, $?.exitstatus
+  end
 end

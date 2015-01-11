@@ -10,7 +10,7 @@ class HerokuToolbelt < Formula
     bin.write_exec_script libexec/"bin/heroku"
   end
 
-  test do
+  def test
     system "#{bin}/heroku", "version"
   end
 end

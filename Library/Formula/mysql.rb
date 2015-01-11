@@ -9,24 +9,19 @@ class Mysql < Formula
     sha1 "8987fcf7576f6985b741b19f6b12f6a636be52d3" => :mountain_lion
   end
 
+  depends_on 'cmake' => :build
+  depends_on 'pidof' unless MacOS.version >= :mountain_lion
+
   option :universal
-  option "with-tests", "Build with unit tests"
-  option "with-embedded", "Build the embedded server"
-  option "with-archive-storage-engine", "Compile with the ARCHIVE storage engine enabled"
-  option "with-blackhole-storage-engine", "Compile with the BLACKHOLE storage engine enabled"
-  option "with-local-infile", "Build with local infile loading support"
-  option "with-memcached", "Enable innodb-memcached support"
-  option "with-debug", "Build with debug support"
+  option 'with-tests', 'Build with unit tests'
+  option 'with-embedded', 'Build the embedded server'
+  option 'with-archive-storage-engine', 'Compile with the ARCHIVE storage engine enabled'
+  option 'with-blackhole-storage-engine', 'Compile with the BLACKHOLE storage engine enabled'
+  option 'enable-local-infile', 'Build with local infile loading support'
+  option 'enable-memcached', 'Enable innodb-memcached support'
+  option 'enable-debug', 'Build with debug support'
 
-  deprecated_option "enable-local-infile" => "with-local-infile"
-  deprecated_option "enable-memcached" => "with-memcached"
-  deprecated_option "enable-debug" => "with-debug"
-
-  depends_on "cmake" => :build
-  depends_on "pidof" unless MacOS.version >= :mountain_lion
-  depends_on "openssl"
-
-  conflicts_with "mysql-cluster", "mariadb", "percona-server",
+  conflicts_with 'mysql-cluster', 'mariadb', 'percona-server',
     :because => "mysql, mariadb, and percona install the same binaries."
   conflicts_with "mysql-connector-c",
     :because => "both install MySQL client libraries"
@@ -60,7 +55,6 @@ class Mysql < Formula
       -DINSTALL_INFODIR=share/info
       -DINSTALL_MYSQLSHAREDIR=share/mysql
       -DWITH_SSL=yes
-      -DWITH_SSL=system
       -DDEFAULT_CHARSET=utf8
       -DDEFAULT_COLLATION=utf8_general_ci
       -DSYSCONFDIR=#{etc}
@@ -108,7 +102,7 @@ class Mysql < Formula
     rm_rf prefix+"data"
 
     # Link the setup script into bin
-    bin.install_symlink prefix/"scripts/mysql_install_db"
+    ln_s prefix+'scripts/mysql_install_db', bin+'mysql_install_db'
 
     # Fix up the control script and link into bin
     inreplace "#{prefix}/support-files/mysql.server" do |s|
@@ -117,17 +111,18 @@ class Mysql < Formula
       s.gsub!(/pidof/, "pgrep") if MacOS.version >= :mountain_lion
     end
 
-    bin.install_symlink prefix/"support-files/mysql.server"
+    ln_s "#{prefix}/support-files/mysql.server", bin
 
     # Move mysqlaccess to libexec
     libexec.mkpath
     mv "#{bin}/mysqlaccess", libexec
     mv "#{bin}/mysqlaccess.conf", libexec
+
+    # Make sure the var/mysql directory exists
+    (var+"mysql").mkpath
   end
 
   def post_install
-    # Make sure the var/mysql directory exists
-    (var+"mysql").mkpath
     unless File.exist? "#{var}/mysql/mysql/user.frm"
       ENV["TMPDIR"] = nil
       system "#{bin}/mysql_install_db", "--verbose", "--user=#{ENV["USER"]}",
@@ -157,7 +152,7 @@ class Mysql < Formula
       <string>#{plist_name}</string>
       <key>ProgramArguments</key>
       <array>
-        <string>#{opt_bin}/mysqld_safe</string>
+        <string>#{opt_prefix}/bin/mysqld_safe</string>
         <string>--bind-address=127.0.0.1</string>
         <string>--datadir=#{var}/mysql</string>
       </array>
