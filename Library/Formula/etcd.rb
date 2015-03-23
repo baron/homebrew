@@ -1,15 +1,13 @@
-require "formula"
-
 class Etcd < Formula
   homepage "https://github.com/coreos/etcd"
-  url "https://github.com/coreos/etcd/archive/v0.4.6.tar.gz"
-  sha1 "80b405fd01527eea6668fde0186ca6b119c1185c"
+  url "https://github.com/coreos/etcd/archive/v2.0.5.tar.gz"
+  sha256 "ded57e8aac39c8ea7badb9785fbca564b3d768c2482c2d9c40bff83a3dc32ad8"
   head "https://github.com/coreos/etcd.git"
 
   bottle do
-    sha1 "dd7aff45b8fb94304047015343d03d692f7a991f" => :mavericks
-    sha1 "e548cb1d29e4d0b5a78a6cd9e30034fb669e8c5a" => :mountain_lion
-    sha1 "bc35b7c3315e899f4e6b96c9db7615de03c04dbd" => :lion
+    sha256 "41f81923a5c7c2fafb2ec1f6c95d354daea8986cf32c4fca56735180fd130a03" => :yosemite
+    sha256 "e3ca3ccf596d76b9a60060e80edc691928617b39df93c5a7dac1bf41895c4554" => :mavericks
+    sha256 "d2ca6ebfe34d406deed30968f491def63c1e06b1239f605203c6ce1990a4d564" => :mountain_lion
   end
 
   depends_on "go" => :build
@@ -18,6 +16,7 @@ class Etcd < Formula
     ENV["GOPATH"] = buildpath
     system "./build"
     bin.install "bin/etcd"
+    bin.install "bin/etcdctl"
   end
 
   def plist; <<-EOS.undent

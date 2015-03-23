@@ -1,13 +1,16 @@
 class Openssl < Formula
   homepage "https://openssl.org"
-  url "https://www.openssl.org/source/openssl-1.0.1k.tar.gz"
-  mirror "https://raw.githubusercontent.com/DomT4/LibreMirror/master/OpenSSL/openssl-1.0.1k.tar.gz"
-  sha256 "8f9faeaebad088e772f4ef5e38252d472be4d878c6b3a2718c10a4fcebe7a41c"
+  url "https://www.openssl.org/source/openssl-1.0.2a.tar.gz"
+  mirror "https://raw.githubusercontent.com/DomT4/LibreMirror/master/OpenSSL/openssl-1.0.2a.tar.gz"
+  sha256 "15b6393c20030aab02c8e2fe0243cb1d1d18062f6c095d67bca91871dc7f324a"
+  # Work around this being parsed as an alpha version by our
+  # version detection code.
+  version "1.0.2a-1"
 
   bottle do
-    sha1 "3d0e5529a124be70266dd2a2074f4f84db38bb19" => :yosemite
-    sha1 "449b81391bd9718b1ed7a37678c686b712669f38" => :mavericks
-    sha1 "8f1b30f6352486726b8420e80cceeecd49a61f82" => :mountain_lion
+    sha256 "61547bc1716db058c4e5a99e91067783031e8d47acfea9a8742e9899b363b463" => :yosemite
+    sha256 "bff2a6db8e56255c85a49ccbad6cc8611bc47d1482ba630c632c6f9ca7cd7f35" => :mavericks
+    sha256 "1e985e8bfb5f3c3041c6e022561aa137643895b7bd920654c85197268aed3637" => :mountain_lion
   end
 
   option :universal

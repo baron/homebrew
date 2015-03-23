@@ -1,24 +1,24 @@
 class Git < Formula
   homepage "http://git-scm.com"
-  url "https://www.kernel.org/pub/software/scm/git/git-2.2.1.tar.gz"
-  sha1 "02ae13b144fa5b83733987791cacaa3de855ff0b"
+  url "https://www.kernel.org/pub/software/scm/git/git-2.3.3.tar.gz"
+  sha256 "c189e4a48d8805482f450db666330c79bcefae37e0d035c7717517126ddf4305"
 
   head "https://github.com/git/git.git", :shallow => false
 
   bottle do
-    sha1 "997335b0cf3a0cdc2503b99e0ef6ec1386d137df" => :yosemite
-    sha1 "e56fbf898c7358caa6d4a6e415bdc862ab4b2df9" => :mavericks
-    sha1 "0054c2196c415196c165212f8fbc0cc674a7139a" => :mountain_lion
+    sha256 "20563d33ec3edf6af42078106c77b62d9fc8c5e37d70d28b45fd8f945b393c0e" => :yosemite
+    sha256 "01cbb1a3bc1de9c255cc9a0965dd777383db9bb3895bae711316ec5a09f96de4" => :mavericks
+    sha256 "c7d03e7029318922d8f4b8cb429ce732d063ab26fcfe6b57cd8899a136b21c94" => :mountain_lion
   end
 
   resource "man" do
-    url "https://www.kernel.org/pub/software/scm/git/git-manpages-2.2.1.tar.gz"
-    sha1 "b914710a4fee2b3d13cdf15fa2f835461c53dd57"
+    url "https://www.kernel.org/pub/software/scm/git/git-manpages-2.3.3.tar.gz"
+    sha256 "bda14d58fc78d029f04e766a074ac9ec4fe59de6d66b82ea6c848db9405c03ae"
   end
 
   resource "html" do
-    url "https://www.kernel.org/pub/software/scm/git/git-htmldocs-2.2.1.tar.gz"
-    sha1 "211cea89850804ec92a3135c53d237a9c69704f0"
+    url "https://www.kernel.org/pub/software/scm/git/git-htmldocs-2.3.3.tar.gz"
+    sha256 "3fdef7d6e86f8592fa5bce73e81c489474e594577ace9a265fe2447e0110acf7"
   end
 
   option "with-blk-sha1", "Compile with the block-optimized SHA1 implementation"
@@ -37,7 +37,7 @@ class Git < Formula
   # See https://github.com/Homebrew/homebrew/issues/34554
   if build.with? "brewed-svn"
     depends_on "swig"
-    depends_on "subversion" => "perl"
+    depends_on "subversion" => "with-perl"
   end
 
   def install
@@ -75,8 +75,6 @@ class Git < Formula
     end
 
     ENV["NO_GETTEXT"] = "1" if build.without? "gettext"
-
-    ENV["GIT_DIR"] = cached_download/".git" if build.head?
 
     system "make", "prefix=#{prefix}",
                    "sysconfdir=#{etc}",

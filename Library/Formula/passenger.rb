@@ -1,27 +1,32 @@
-require 'formula'
-
 class Passenger < Formula
-  homepage 'https://www.phusionpassenger.com/'
-  url 'http://s3.amazonaws.com/phusion-passenger/releases/passenger-4.0.57.tar.gz'
-  sha1 '817e1fd7c3d96ddbdff27489122f39b3295d6ac0'
-  head 'https://github.com/phusion/passenger.git'
+  homepage "https://www.phusionpassenger.com/"
+  url "https://s3.amazonaws.com/phusion-passenger/releases/passenger-5.0.4.tar.gz"
+  sha256 '5c29f2c1407db515ddccd540443cb34bff7ca180b3e269c2e28a34ad795f99f6'
+  head "https://github.com/phusion/passenger.git"
 
   bottle do
-    sha1 "3fb270caab2623ff6f1ee6909b992cd20f95c189" => :yosemite
-    sha1 "f5bf7d36cfd0c0ce7b75d71de147155b134be07b" => :mavericks
-    sha1 "00e5099bd25a9b36ffd0256dc36616da9f89f5ef" => :mountain_lion
+    sha256 "0acfd8f0c9c3270f4892914d4f4101b1bdcc4b68819e3ef3f3680d8ae97bae9d" => :yosemite
+    sha256 "06072b3d08d2c9b6664b89bea07a741a6b2d9e02379e2b80547960718de3fb78" => :mavericks
+    sha256 "425d5e77d38fe1d55597cc12d0aab822f2c35ad285a5499633d5934fe5099e47" => :mountain_lion
   end
 
-  depends_on 'pcre'
+  depends_on "pcre"
   depends_on "openssl"
   depends_on :macos => :lion
 
-  option 'without-apache2-module', 'Disable Apache2 module'
+  option "without-apache2-module", "Disable Apache2 module"
 
   def install
     rake "apache2" if build.with? "apache2-module"
     rake "nginx"
     rake "webhelper"
+
+    (libexec/"download_cache").mkpath
+
+    # Fixes https://github.com/phusion/passenger/issues/1288
+    rm_rf "buildout/libev"
+    rm_rf "buildout/libeio"
+    rm_rf "buildout/cache"
 
     necessary_files = Dir[".editorconfig", "configure", "Rakefile", "README.md", "CONTRIBUTORS",
       "CONTRIBUTING.md", "LICENSE", "CHANGELOG", "INSTALL.md",
@@ -43,7 +48,7 @@ class Passenger < Formula
     system "/usr/bin/ruby", "./dev/install_scripts_bootstrap_code.rb",
       "--nginx-module-config", libexec/"bin", libexec/"ext/nginx/config"
 
-    mv libexec/'man', share
+    mv libexec/"man", share
   end
 
   def caveats
@@ -66,7 +71,7 @@ class Passenger < Formula
   test do
     ruby_libdir = `#{HOMEBREW_PREFIX}/bin/passenger-config --ruby-libdir`.strip
     if ruby_libdir != (libexec/"lib").to_s
-      raise "Invalid installation"
+      fail "Invalid installation"
     end
   end
 end

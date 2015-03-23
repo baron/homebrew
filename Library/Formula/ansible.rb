@@ -1,17 +1,16 @@
-require "formula"
-
 class Ansible < Formula
   homepage "http://www.ansible.com/home"
-  url "http://releases.ansible.com/ansible/ansible-1.8.2.tar.gz"
-  sha1 "4cfbec3a0850639384c908e77e2823acb1297e1e"
+  url "http://releases.ansible.com/ansible/ansible-1.8.4.tar.gz"
+  sha1 "74be0c102506d14940bc76f5c5659618368c41ec"
+  revision 1
 
   head "https://github.com/ansible/ansible.git", :branch => "devel"
 
   bottle do
-    revision 2
-    sha1 "ecedf8f29c9ebb482c1f3d56f8a97591d9a55ad5" => :yosemite
-    sha1 "4abe1bb420b7396bb213702bee06da733c044f39" => :mavericks
-    sha1 "6140887ca00017c45a2dfe5d699db072a8e035a7" => :mountain_lion
+    revision 1
+    sha256 "a2145b4dc522b42647908088ef7cf7a9f582cec2f16f2fbad4554b60aaccf51e" => :yosemite
+    sha256 "5e0fab60360ca91db9c6975bba1810b9a883a474a82f0188fe8f718016f6d391" => :mavericks
+    sha256 "a0c2da4d196e9c4c994511705f40f42583c96683cf0bfe02cd76a810b54e0e72" => :mountain_lion
   end
 
   depends_on :python if MacOS.version <= :snow_leopard
@@ -23,8 +22,8 @@ class Ansible < Formula
   end
 
   resource "requests" do
-    url "https://pypi.python.org/packages/source/r/requests/requests-2.2.1.tar.gz"
-    sha1 "88eb1fd6a0dfb8b97262f8029978d7c75eebc16f"
+    url "https://pypi.python.org/packages/source/r/requests/requests-2.6.0.tar.gz"
+    sha256 "1cdbed1f0e236f35ef54e919982c7a338e4fea3786310933d3a7887a04b74d75"
   end
 
   resource "websocket-client" do
@@ -43,8 +42,8 @@ class Ansible < Formula
   end
 
   resource "boto" do
-    url "https://pypi.python.org/packages/source/b/boto/boto-2.34.0.tar.gz"
-    sha1 "e19d252b58054a7711fae910324e26b2b551a44d"
+    url "https://pypi.python.org/packages/source/b/boto/boto-2.36.0.tar.gz"
+    sha1 "f230ff9b041d3b43244086e38b7b6029450898be"
   end
 
   resource "pyyaml" do
@@ -78,8 +77,8 @@ class Ansible < Formula
   end
 
   resource "pywinrm" do
-    url "https://github.com/diyan/pywinrm/archive/df049454a9309280866e0156805ccda12d71c93a.zip"
-    sha1 "f2f94b9a1038425323afaa191a25798c1c0b8426"
+    url "https://pypi.python.org/packages/source/p/pywinrm/pywinrm-0.0.3.tar.gz"
+    sha1 "9b4f50e838b9222a101094328b0f6e8669ac17b7"
   end
 
   resource "isodate" do

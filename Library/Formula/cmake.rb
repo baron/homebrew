@@ -4,7 +4,7 @@ class NoExpatFramework < Requirement
   end
 
   satisfy :build_env => false do
-    not File.exist? expat_framework
+    !File.exist? expat_framework
   end
 
   def message; <<-EOS.undent
@@ -20,18 +20,19 @@ end
 
 class Cmake < Formula
   homepage "http://www.cmake.org/"
-  url "http://www.cmake.org/files/v3.1/cmake-3.1.0.tar.gz"
-  sha1 "cc20c40f5480c83a0204f516a490b470bd3a963a"
+  url "http://www.cmake.org/files/v3.2/cmake-3.2.1.tar.gz"
+  sha1 "53c1fe2aaae3b2042c0fe5de177f73ef6f7b267f"
   head "http://cmake.org/cmake.git"
 
   bottle do
     cellar :any
-    sha1 "7a015c43f30830ffc722dbd548b014d725b1cc64" => :yosemite
-    sha1 "73716b458ef13282f84a870c9faf0cea52b0c508" => :mavericks
-    sha1 "d19131db9de47fa03ad08edce1c1c1b6eb6c3aa0" => :mountain_lion
+    sha256 "b5eee80616e1e957249c69c00fa374672ef669996f27c71410655e1c2656a856" => :yosemite
+    sha256 "8e3318bda82a7158002ffd37b9ef1eb7424a59db47d9e7a1bd808c9b130c341f" => :mavericks
+    sha256 "cc70078e6c6cfbca7b8939b65c5133e7fcf90c21ba19e5c6a7a84fe174026440" => :mountain_lion
   end
 
   option "without-docs", "Don't build man pages"
+
   depends_on :python => :build if MacOS.version <= :snow_leopard && build.with?("docs")
   depends_on "xz" # For LZMA
 
@@ -50,8 +51,8 @@ class Cmake < Formula
   end
 
   resource "pygments" do
-    url "https://pypi.python.org/packages/source/P/Pygments/Pygments-2.0.1.tar.gz"
-    sha1 "b9e9236693ccf6e86414e8578bf8874181f409de"
+    url "https://pypi.python.org/packages/source/P/Pygments/Pygments-2.0.2.tar.gz"
+    sha1 "fe2c8178a039b6820a7a86b2132a2626df99c7f8"
   end
 
   resource "jinja2" do
@@ -85,6 +86,7 @@ class Cmake < Formula
       --system-libs
       --parallel=#{ENV.make_jobs}
       --no-system-libarchive
+      --no-system-jsoncpp
       --datadir=/share/cmake
       --docdir=/share/doc/cmake
       --mandir=/share/man

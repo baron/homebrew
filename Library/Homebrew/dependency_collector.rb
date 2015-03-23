@@ -18,7 +18,7 @@ require 'set'
 class DependencyCollector
   # Define the languages that we can handle as external dependencies.
   LANGUAGE_MODULES = Set[
-    :chicken, :jruby, :lua, :node, :ocaml, :perl, :python, :rbx, :ruby
+    :chicken, :jruby, :lua, :node, :ocaml, :perl, :python, :python3, :rbx, :ruby
   ].freeze
 
   CACHE = {}
@@ -107,6 +107,7 @@ class DependencyCollector
     when :macos      then MinimumMacOSRequirement.new(tags)
     when :mysql      then MysqlDependency.new(tags)
     when :postgresql then PostgresqlDependency.new(tags)
+    when :gpg        then GPGDependency.new(tags)
     when :fortran    then FortranDependency.new(tags)
     when :mpi        then MPIDependency.new(*tags)
     when :tex        then TeXDependency.new(tags)

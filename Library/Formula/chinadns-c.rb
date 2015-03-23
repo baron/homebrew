@@ -1,15 +1,13 @@
-require "formula"
-
 class ChinadnsC < Formula
   homepage "https://github.com/clowwindy/ChinaDNS-C"
-  url "https://github.com/clowwindy/ChinaDNS-C/releases/download/1.1.8/chinadns-c-1.1.8.tar.gz"
-  sha1 "e712aab436e555a242f6c3c8acd7474b0b445bf1"
+  url "https://github.com/clowwindy/ChinaDNS/releases/download/1.3.0/chinadns-1.3.0.tar.gz"
+  sha1 "0877eed8bb385ca72cede3b3fca35f5d5e40e999"
 
   bottle do
     cellar :any
-    sha1 "1534c5254c1c2d62585f9c47cd931ce973d4ab0e" => :yosemite
-    sha1 "0e3acccedeacedf20602574c9364a86a62e67195" => :mavericks
-    sha1 "1287a11becbb9dffe25cba272b77a3c2eb3b4d75" => :mountain_lion
+    sha1 "68b1bee30ce1870bce29680ef25d3a180674ecd3" => :yosemite
+    sha1 "53c4a55f0bf19f11d06a4d80200fd9e4fc5040ef" => :mavericks
+    sha1 "1ce8fcc9e873ca5aa24133fb0b0c0bd98fde27d3" => :mountain_lion
   end
 
   def install

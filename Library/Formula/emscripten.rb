@@ -1,14 +1,12 @@
-require "formula"
-
 class Emscripten < Formula
   homepage "https://kripken.github.io/emscripten-site/"
-  url "https://github.com/kripken/emscripten/archive/1.28.0.tar.gz"
-  sha1 "6d90ed5bb4aa3b54a626e451937754a9ae34650f"
+  url "https://github.com/kripken/emscripten/archive/1.29.11.tar.gz"
+  sha1 "d926f406486e3c3a94a1fe58783a91fd6975bc9c"
 
   bottle do
-    sha1 "a5fe0b92e8d915988ca5bce83b4f5d739a1f154b" => :yosemite
-    sha1 "c59c1306fcba0acc6ab4f749977f65dd52ad3c2f" => :mavericks
-    sha1 "7fd747e61f0fc764124c27b20c5d3625496b3297" => :mountain_lion
+    sha256 "75c43ccaa49dc749f51bae40ac86d4bb767df74866ab9650dd8153f79139d529" => :yosemite
+    sha256 "61d9ec9b4f6f914fcc17cc8278081dfd5b4858c287fc5b1ef1a333bd175a190e" => :mavericks
+    sha256 "699b9c70104360d5210a3eeb6a09e93c6b78140566ac39eda89c9eb317050ccb" => :mountain_lion
   end
 
   head do
@@ -25,15 +23,17 @@ class Emscripten < Formula
 
   stable do
     resource "fastcomp" do
-      url "https://github.com/kripken/emscripten-fastcomp/archive/1.28.0.tar.gz"
-      sha1 "fd8cb60d7d5c33d435a0a772084baee634d6ce61"
+      url "https://github.com/kripken/emscripten-fastcomp/archive/1.29.11.tar.gz"
+      sha1 "bde56decd9b46962b53b129de5d942dd03d9e960"
     end
 
     resource "fastcomp-clang" do
-      url "https://github.com/kripken/emscripten-fastcomp-clang/archive/1.28.0.tar.gz"
-      sha1 "d01ab3763194c04c78c30dfa632bf52a90bbdb71"
+      url "https://github.com/kripken/emscripten-fastcomp-clang/archive/1.29.11.tar.gz"
+      sha1 "08a75316f4578ca0b3a40316aa6dc52f89199a61"
     end
   end
+
+  needs :cxx11
 
   depends_on :python if MacOS.version <= :snow_leopard
   depends_on "node"
@@ -41,6 +41,7 @@ class Emscripten < Formula
   depends_on "yuicompressor"
 
   def install
+    ENV.cxx11
     # OSX doesn't provide a "python2" binary so use "python" instead.
     python2_shebangs = `grep --recursive --files-with-matches ^#!/usr/bin/.*python2$ #{buildpath}`
     python2_shebang_files = python2_shebangs.lines.sort.uniq

@@ -3,21 +3,21 @@ class Tor < Formula
   url "https://dist.torproject.org/tor-0.2.5.10.tar.gz"
   mirror "https://tor.eff.org/dist/tor-0.2.5.10.tar.gz"
   sha256 "b3dd02a5dcd2ffe14d9a37956f92779d4427edf7905c0bba9b1e3901b9c5a83b"
-  revision 1
+  revision 2
 
   bottle do
-    sha1 "e96c15e3030c7ca9ad7804bde4024c71f9362f82" => :yosemite
-    sha1 "12dce18abe3abec95c8c5f77e8aa89fbb5168ed8" => :mavericks
-    sha1 "f1035e68a814e48dd3bca01176ca8b504f31188d" => :mountain_lion
+    sha1 "0a17052c81afa7dfdb9d6988cfa84839d3f7e8f8" => :yosemite
+    sha1 "4d74af6045cf81c77fa70d243535e472c19c91d4" => :mavericks
+    sha1 "d8b6e1b05ebb7dc441c9fa0199165a9b396514e9" => :mountain_lion
   end
 
   devel do
-    url "https://dist.torproject.org/tor-0.2.6.2-alpha.tar.gz"
-    mirror "https://tor.eff.org/dist/tor-0.2.6.2-alpha.tar.gz"
-    sha256 "b0e765736b17b91088a2016e7f09e4fafee81282f8bc8647987f975b6a583379"
-    version "0.2.6.2-alpha"
+    url "https://dist.torproject.org/tor-0.2.6.5-rc.tar.gz"
+    mirror "https://tor.eff.org/dist/tor-0.2.6.5-rc.tar.gz"
+    sha256 "1a78bc971078c8aee1d0927bf6629610efef2cce31219580b2a73cc268d4103e"
+    version "0.2.6.5-rc"
 
-    # Move this to the main block when devel = stable release.
+    # Move this to the main block when current devel = stable release.
     depends_on "libscrypt" => :optional
   end
 
@@ -37,6 +37,7 @@ class Tor < Formula
 
     args << "--with-libnatpmp-dir=#{Formula["libnatpmp"].opt_prefix}" if build.with? "libnatpmp"
     args << "--with-libminiupnpc-dir=#{Formula["miniupnpc"].opt_prefix}" if build.with? "miniupnpc"
+    args << "--disable-libscrypt" if build.devel? && build.without?("libscrypt")
 
     system "./configure", *args
     system "make", "install"

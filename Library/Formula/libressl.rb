@@ -1,17 +1,13 @@
-require "formula"
-
 class Libressl < Formula
   homepage "http://www.libressl.org/"
-  url "http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.1.2.tar.gz"
-  mirror "https://raw.githubusercontent.com/DomT4/LibreMirror/master/LibreSSL/libressl-2.1.2.tar.gz"
-  sha256 "07c05f12e5d49dbfcf82dd23b6b4877b7cdb1c8e4c8dd27cb4d9e5758a6caf52"
-
-  option "without-libtls", "Build without libtls"
+  url "http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.1.6.tar.gz"
+  mirror "https://raw.githubusercontent.com/DomT4/LibreMirror/master/LibreSSL/libressl-2.1.6.tar.gz"
+  sha256 "4f826dd97b3b8001707073bde8401493f9cd4668465b481c042d28e3973653a8"
 
   bottle do
-    sha1 "fca5d55a55ea69eea9bd462d788f9157ba68853b" => :yosemite
-    sha1 "b8ba84dd423acb17976a17437c91ed33d59636f0" => :mavericks
-    sha1 "dd58fa644e7fc23a7883696372174fbfa1451930" => :mountain_lion
+    sha256 "8de261eb5255a695567e641bab92bc4c6f09ed36806de0b49a98b6d9b6a3caf7" => :yosemite
+    sha256 "0d094c6477b38b47a96fd4100c08fe70c502bd910943ef091990cbee110f98e4" => :mavericks
+    sha256 "2acfff0e515dbcfea2b299ce136efcf7c9f4fec7484ccdad1c8cedd3672a69ef" => :mountain_lion
   end
 
   head do
@@ -32,8 +28,6 @@ class Libressl < Formula
       --sysconfdir=#{etc}/libressl
       --with-enginesdir=#{lib}/engines
     ]
-
-    args << "--enable-libtls" if build.with? "libtls"
 
     system "./autogen.sh" if build.head?
     system "./configure", *args
@@ -66,7 +60,7 @@ class Libressl < Formula
   test do
     (testpath/"testfile.txt").write("This is a test file")
     expected_checksum = "91b7b0b1e27bfbf7bc646946f35fa972c47c2d32"
-    system "#{bin}/openssl", "dgst", "-sha1", "-out", "checksum.txt", "testfile.txt"
+    system bin/"openssl", "dgst", "-sha1", "-out", "checksum.txt", "testfile.txt"
     open("checksum.txt") do |f|
       checksum = f.read(100).split("=").last.strip
       assert_equal checksum, expected_checksum
